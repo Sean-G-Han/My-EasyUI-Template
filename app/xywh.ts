@@ -6,20 +6,42 @@ export class referencePoint {
     static BOTTOM_RIGHT = "bottom-right";
 }
 
-export type XYWH = {
-    x: number;
-    y: number;
+export type Size = {
     width: number;
     height: number;
+};
+
+export type Pos = {
+    x: number;
+    y: number;
+};
+
+export type XYWH = Size & Pos & {
     reference: referencePoint;
 };
+
+export function copy(xywh: XYWH): XYWH {
+    return { x: xywh.x, y: xywh.y, width: xywh.width, height: xywh.height, reference: xywh.reference };
+}
 
 export function create(x: number, y: number, width: number, height: number, reference: referencePoint = referencePoint.TOP_LEFT): XYWH {
     return { x, y, width, height, reference };
 }
 
+export function createFromCorners(x1: number, y1: number, x2: number, y2: number, reference: referencePoint = referencePoint.TOP_LEFT): XYWH {
+    const minX = Math.min(x1, x2);
+    const minY = Math.min(y1, y2);
+    const maxX = Math.max(x1, x2);
+    const maxY = Math.max(y1, y2);
+    return convertTo({ x: minX, y: minY, width: maxX - minX, height: maxY - minY, reference: referencePoint.TOP_LEFT }, reference);
+}
+
+export function createPos(x: number, y: number): Pos {
+    return { x, y };
+}
+
 export function convertToTopLeft(xywh: XYWH): XYWH {
-    let { x, y, width, height } = xywh;
+    let { x, y, width, height } = copy(xywh);
     switch (xywh.reference) {
         case referencePoint.TOP_LEFT:
             break;
@@ -64,11 +86,11 @@ export function convertTo(xywh: XYWH, reference: referencePoint): XYWH {
     return { x, y, width, height, reference };
 }
 
-function _getReferenceXY(xywh: XYWH): { x: number; y: number } {
+function _getXY(xywh: XYWH): Pos {
     return { x: xywh.x, y: xywh.y };
 }
 
-function _setOffset(xywh: XYWH, offsetX: number, offsetY: number): XYWH {
+function _setXY(xywh: XYWH, offsetX: number, offsetY: number): XYWH {
     return { x: offsetX, y: offsetY, width: xywh.width, height: xywh.height, reference: xywh.reference };
 }
 
@@ -92,14 +114,30 @@ export function toStringDetail(xywh: XYWH): string {
     xy: ${toString(xywh)}`;
 }
 
-export function attachTo(child: XYWH, childReference: referencePoint, parent: XYWH, parentReference: referencePoint, offsetX = 0, offsetY = 0): XYWH {
+export function attachRigidTo(child: XYWH, childReference: referencePoint, parent: XYWH, parentReference: referencePoint, offset: Pos = { x: 0, y: 0 }): XYWH {
     let childXYWH = convertTo(_removeXY(child), childReference);
     let parentXYWH = convertTo(parent, parentReference);
 
-    let parentRefXY = _getReferenceXY(parentXYWH);
+    let parentRefXY = _getXY(parentXYWH);
 
     let deltaX = parentRefXY.x
     let deltaY = parentRefXY.y;
 
-    return _setOffset(childXYWH, deltaX + offsetX, deltaY + offsetY);
+    return _setXY(childXYWH, deltaX + offset.x, deltaY + offset.y);
+}
+
+export function attachFlexTo(parent1: XYWH, parent1Reference: referencePoint, parent2: XYWH, parent2Reference: referencePoint, offset1: Pos = { x: 0, y: 0 }, offset2: Pos = { x: 0, y: 0 }): XYWH {
+    let parent1XYWH = convertTo(parent1, parent1Reference);
+    let parent2XYWH = convertTo(parent2, parent2Reference);
+
+    let parent1RefXY = _getXY(parent1XYWH);
+    let parent2RefXY = _getXY(parent2XYWH);
+
+    return createFromCorners(
+        parent1RefXY.x + offset1.x,
+        parent1RefXY.y + offset1.y,
+        parent2RefXY.x + offset2.x,
+        parent2RefXY.y + offset2.y,
+        referencePoint.TOP_LEFT
+    );
 }

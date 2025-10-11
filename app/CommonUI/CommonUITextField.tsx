@@ -19,31 +19,31 @@ type FieldProps = {
 }
 
 const fieldTypeMap: Record<TypeField, FieldProps> = {
-  password: {
-    keyboardType: "default",
-    secureTextEntry: true,
-    autoCapitalize: "none",
-  },
-  text: {
-    keyboardType: "default",
-    secureTextEntry: false,
-    autoCapitalize: "sentences",
-  },
-  email: {
-    keyboardType: "email-address",
-    secureTextEntry: false,
-    autoCapitalize: "none",
-  },
-  numeric: {
-    keyboardType: "numeric",
-    secureTextEntry: false,
-    autoCapitalize: "none",
-  },
-  phone: {
-    keyboardType: "phone-pad",
-    secureTextEntry: false,
-    autoCapitalize: "none",
-  },
+    password: {
+        keyboardType: "default",
+        secureTextEntry: true,
+        autoCapitalize: "none",
+    },
+    text: {
+        keyboardType: "default",
+        secureTextEntry: false,
+        autoCapitalize: "sentences",
+    },
+    email: {
+        keyboardType: "email-address",
+        secureTextEntry: false,
+        autoCapitalize: "none",
+    },
+    numeric: {
+        keyboardType: "numeric",
+        secureTextEntry: false,
+        autoCapitalize: "none",
+    },
+    phone: {
+        keyboardType: "phone-pad",
+        secureTextEntry: false,
+        autoCapitalize: "none",
+    },
 };
 
 type Props = {
