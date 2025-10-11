@@ -1,5 +1,5 @@
 {
-  "name": "project-a",
+  "name": "{{APP_NAME}}",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {

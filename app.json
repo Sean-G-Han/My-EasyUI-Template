@@ -1,8 +1,8 @@
 {
   "expo": {
-    "scheme": "project-a",
-    "name": "project-a",
-    "slug": "project-a",
+    "scheme": "{{APP_NAME}}",
+    "name": "{{APP_NAME}}",
+    "slug": "{{APP_NAME}}",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
