@@ -25,6 +25,16 @@ const Home = () => {
         XYWH.createPos(30, 30),
         XYWH.createPos(-30, -30)
     );
+    const miniSideMenu = XYWH.attachFlexTo(
+        cornerTL,
+        XYWH.referencePoint.TOP_RIGHT,
+        cornerTL,
+        XYWH.referencePoint.BOTTOM_RIGHT,
+        XYWH.createPos(0, 0),
+        XYWH.createPos(0, 0),
+        "LEFT",
+        100
+    );
     const cornerTR = XYWH.attachFlexTo(
         parent,
         XYWH.referencePoint.TOP_RIGHT,
@@ -52,13 +62,16 @@ const Home = () => {
 
 
     return (
-        <CommonUIRigidBox xywh={parent} style={{backgroundColor: 'lightgrey', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+        <CommonUIRigidBox xywh={parent}>
             <CommonUIRigidBox padding={10} xywh={child}>
                 <CommonUITextField placeholder='Username'/>
-                <CommonUITextField placeholder='Password'/>
+                <CommonUITextField placeholder='Password' type='password'/>
                 <CommonUIButton text='Login' onPress={() => {}}/>
             </CommonUIRigidBox>
-            <CommonUIRigidBox xywh={cornerTL} style={{backgroundColor: 'grey'}}/>
+            
+            <CommonUIRigidBox xywh={cornerTL} style={{backgroundColor: 'white'}}/>
+                <CommonUIRigidBox xywh={miniSideMenu} style={{backgroundColor: 'lightgrey'}}/>
+
             <CommonUIRigidBox xywh={cornerTR} style={{backgroundColor: 'grey'}}/>
             <CommonUIRigidBox xywh={cornerBL} style={{backgroundColor: 'grey'}}/>
             <CommonUIRigidBox xywh={cornerBR} style={{backgroundColor: 'grey'}}/>

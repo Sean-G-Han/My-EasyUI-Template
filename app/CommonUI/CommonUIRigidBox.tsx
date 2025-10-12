@@ -12,6 +12,7 @@ export type Props = {
 
 const CommonUIRigidBox = ({ xywh, children, padding, style }: Props) => {
     const position: XYWH.XYWH = XYWH.convertToTopLeft(xywh);
+    console.log("Rendering CommonUIRigidBox at", position);
     return (
         <CommonUIBox width={position.width} height={position.height} padding={padding || 0} style={[{...styles.container, left: position.x, top: position.y}, style]}>
             {children}

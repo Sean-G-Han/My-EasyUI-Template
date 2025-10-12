@@ -126,12 +126,87 @@ export function attachRigidTo(child: XYWH, childReference: referencePoint, paren
     return _setXY(childXYWH, deltaX + offset.x, deltaY + offset.y);
 }
 
-export function attachFlexTo(parent1: XYWH, parent1Reference: referencePoint, parent2: XYWH, parent2Reference: referencePoint, offset1: Pos = { x: 0, y: 0 }, offset2: Pos = { x: 0, y: 0 }): XYWH {
+export function attachFlexTo(
+        parent1: XYWH, 
+        parent1Reference: referencePoint, 
+        parent2: XYWH, 
+        parent2Reference: referencePoint, 
+        offset1: Pos = { x: 0, y: 0 }, 
+        offset2: Pos = { x: 0, y: 0 }, 
+        growDirection: "CENTER" | "LEFT" | "RIGHT" | "UP" | "DOWN" = "CENTER",
+        growSize: number = 0
+    ): XYWH {
     let parent1XYWH = convertTo(parent1, parent1Reference);
     let parent2XYWH = convertTo(parent2, parent2Reference);
 
     let parent1RefXY = _getXY(parent1XYWH);
     let parent2RefXY = _getXY(parent2XYWH);
+
+    if (parent1RefXY.y === parent2RefXY.y) {
+        if (!growDirection || !growSize) {
+            throw new Error("growDirection and growSize must be provided when parent1RefXY.y === parent2RefXY.y");
+        }
+
+        switch (growDirection) {
+            case "LEFT":
+                throw new Error("growDirection cannot be LEFT when parent1RefXY.y === parent2RefXY.y");
+            case "RIGHT":
+                throw new Error("growDirection cannot be RIGHT when parent1RefXY.y === parent2RefXY.y");
+            case "UP":
+                return createFromCorners(
+                    parent1RefXY.x + offset1.x,
+                    parent1RefXY.y + offset1.y - growSize,
+                    parent2RefXY.x + offset2.x,
+                    parent2RefXY.y + offset2.y,
+                );
+            case "DOWN":
+                return createFromCorners(
+                    parent1RefXY.x + offset1.x,
+                    parent1RefXY.y + offset1.y + growSize,
+                    parent2RefXY.x + offset2.x,
+                    parent2RefXY.y + offset2.y,
+                );
+            case "CENTER":
+                return createFromCorners(
+                    parent1RefXY.x + offset1.x,
+                    parent1RefXY.y + offset1.y - growSize / 2,
+                    parent2RefXY.x + offset2.x,
+                    parent2RefXY.y + offset2.y + growSize / 2,
+                );
+        }
+    } else if (parent1RefXY.x === parent2RefXY.x) {
+        if (!growDirection || !growSize) {
+            throw new Error("growDirection and growSize must be provided when parent1RefXY.x === parent2RefXY.x");
+        }
+
+        switch (growDirection) {
+            case "LEFT":
+                return createFromCorners(
+                    parent1RefXY.x + offset1.x - growSize,
+                    parent1RefXY.y + offset1.y,
+                    parent2RefXY.x + offset2.x,
+                    parent2RefXY.y + offset2.y,
+                );
+            case "RIGHT":
+                return createFromCorners(
+                    parent1RefXY.x + offset1.x + growSize,
+                    parent1RefXY.y + offset1.y,
+                    parent2RefXY.x + offset2.x,
+                    parent2RefXY.y + offset2.y,
+                );
+            case "CENTER":
+                return createFromCorners(
+                    parent1RefXY.x + offset1.x - growSize / 2,
+                    parent1RefXY.y + offset1.y,
+                    parent2RefXY.x + offset2.x + growSize / 2,
+                    parent2RefXY.y + offset2.y,
+                );
+            case "UP":
+                throw new Error("growDirection cannot be UP when parent1RefXY.x === parent2RefXY.x");
+            case "DOWN":
+                throw new Error("growDirection cannot be DOWN when parent1RefXY.x === parent2RefXY.x");
+        }   
+    }
 
     return createFromCorners(
         parent1RefXY.x + offset1.x,
