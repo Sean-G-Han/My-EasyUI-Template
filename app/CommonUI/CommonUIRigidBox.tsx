@@ -24,9 +24,6 @@ export default CommonUIRigidBox
 
 const styles = StyleSheet.create({
     container: {
-        borderWidth: 1,
-        borderColor: "black",
-        borderStyle: "solid",
         position: "absolute",
     }
 });
