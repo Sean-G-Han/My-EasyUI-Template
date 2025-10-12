@@ -63,7 +63,7 @@ const Home = () => {
 
     return (
         <CommonUIRigidBox xywh={parent}>
-            <CommonUIRigidBox padding={10} xywh={child}>
+            <CommonUIRigidBox padding={20} xywh={child}>
                 <CommonUITextField placeholder='Username'/>
                 <CommonUITextField placeholder='Password' type='password'/>
                 <CommonUIButton text='Login' onPress={() => {}}/>
