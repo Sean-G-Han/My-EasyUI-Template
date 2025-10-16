@@ -105,31 +105,48 @@ export class Rectangle {
     private static fromSizePos(size: Size, pos: Pos): Rectangle {
         return new Rectangle(size, pos, "top-left");
     }
+    private static toAnimated(value: AnimNum): Animated.Value {
+        if (typeof value === "number") {
+            return new Animated.Value(value);
+        } else {
+            return value as Animated.Value;
+        }
+    }
+
+    private static animatedAbs(value: AnimNum) {
+        const animValue = this.toAnimated(value);
+        return animValue.interpolate({
+            inputRange: [-10000, 0, 10000],
+            outputRange: [10000, 0, 10000],
+        });
+    }
+
+    private static animatedMin(v1: AnimNum, v2: AnimNum) {
+        const a = this.toAnimated(v1);
+        const b = this.toAnimated(v2);
+        const diff = Animated.subtract(a, b);
+        const min = Animated.add(
+            b,
+            diff.interpolate({
+                inputRange: [-10000, 0, 10000],
+                outputRange: [-10000, 0, 0],
+            })
+        );
+        return min;
+    }
+
 
     private static fromTwoCorners(r1: [Rectangle, Point], r2: [Rectangle, Point]): Rectangle {
         const corner1 = r1[0].getCorner(r1[1]);
         const corner2 = r2[0].getCorner(r2[1]);
 
-        let width, height, x, y: AnimNum;
-
-        if (corner1.x > corner2.x) {
-            width = Animated.subtract(corner1.x, corner2.x);
-            x = corner2.x;
-        } else {
-            width = Animated.subtract(corner2.x, corner1.x);
-            x = corner1.x;
-        }
-        if (corner1.y > corner2.y) {
-            height = Animated.subtract(corner1.y, corner2.y);
-            y = corner2.y;
-        } else {
-            height = Animated.subtract(corner2.y, corner1.y);
-            y = corner1.y;
-        }
 
         return new Rectangle(
-            { width: width, height: height},
-            { x: x, y: y },
+            { 
+                width: this.animatedAbs(Animated.subtract(corner2.x, corner1.x)),
+                height: this.animatedAbs(Animated.subtract(corner2.y, corner1.y)),
+            },
+            { x: this.animatedMin(corner1.x, corner2.x), y: this.animatedMin(corner1.y, corner2.y) },
         );
     }
 
