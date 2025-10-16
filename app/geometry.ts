@@ -1,3 +1,7 @@
+import { Animated } from "react-native";
+
+export type AnimNum = number | Animated.Value | Animated.AnimatedNode;
+
 export type Point = "top-left" | "top-right" | "center" | "bottom-left" | "bottom-right";
 
 export type Side = "top" | "right" | "bottom" | "left";
@@ -5,13 +9,13 @@ export type Side = "top" | "right" | "bottom" | "left";
 export type Direction = "center" | "left" | "right" | "up" | "down";
 
 export type Size = {
-    width: number;
-    height: number;
+    width: AnimNum;
+    height: AnimNum;
 };
 
 export type Pos = {
-    x: number;
-    y: number;
+    x: AnimNum;
+    y: AnimNum;
 };
 
 export type XYWH = Pos & Size;
@@ -37,15 +41,15 @@ export class Rectangle {
             this.referencePoint = referencePoint;
     }
 
-    getSide(side: Side): number {
+    getSide(side: Side): AnimNum {
         const rect = this.getRect();
         switch(side) {
             case "top":
                 return rect.y;
             case "right":
-                return rect.x + rect.width;
+                return Animated.add(rect.x, rect.width);
             case "bottom":
-                return rect.y + rect.height;
+                return Animated.add(rect.y, rect.height);
             case "left":
                 return rect.x;
         }
@@ -57,13 +61,19 @@ export class Rectangle {
             case "top-left":
                 return {x: rect.x, y: rect.y};
             case "top-right":
-                return {x: rect.x + rect.width, y: rect.y};
+                const topRightX = Animated.add(rect.x, rect.width);
+                return {x: topRightX, y: rect.y};
             case "bottom-left":
-                return {x: rect.x, y: rect.y + rect.height};
+                const bottomLeftY = Animated.add(rect.y, rect.height);  
+                return {x: rect.x, y: bottomLeftY};
             case "bottom-right":
-                return {x: rect.x + rect.width, y: rect.y + rect.height};
+                const bottomRightX = Animated.add(rect.x, rect.width);
+                const bottomRightY = Animated.add(rect.y, rect.height);
+                return {x: bottomRightX, y: bottomRightY};
             case "center":
-                return {x: rect.x + rect.width/2, y: rect.y + rect.height/2};
+                const centerX = Animated.add(rect.x, Animated.divide(rect.width, 2));
+                const centerY = Animated.add(rect.y, Animated.divide(rect.height, 2));
+                return {x: centerX, y: centerY};
         }
     }
 
@@ -72,13 +82,19 @@ export class Rectangle {
             case "top-left":
                 return {x: this.pos.x, y: this.pos.y, width: this.size.width, height: this.size.height};
             case "top-right":
-                return {x: this.pos.x-this.size.width, y: this.pos.y, width: this.size.width, height: this.size.height};
+                const topRightX = Animated.subtract(this.pos.x, this.size.width);
+                return {x: topRightX, y: this.pos.y, width: this.size.width, height: this.size.height};
             case "bottom-left":
-                return {x: this.pos.x, y: this.pos.y-this.size.height, width: this.size.width, height: this.size.height};
+                const bottomLeftY = Animated.subtract(this.pos.y, this.size.height);
+                return {x: this.pos.x, y: bottomLeftY, width: this.size.width, height: this.size.height};
             case "bottom-right":
-                return {x: this.pos.x-this.size.width, y: this.pos.y-this.size.height, width: this.size.width, height: this.size.height};
+                const bottomRightX = Animated.subtract(this.pos.x, this.size.width);
+                const bottomRightY = Animated.subtract(this.pos.y, this.size.height);
+                return {x: bottomRightX, y: bottomRightY, width: this.size.width, height: this.size.height};
             default:
-                return {x: this.pos.x-this.size.width/2, y: this.pos.y-this.size.height/2, width: this.size.width, height: this.size.height};
+                const centerX = Animated.subtract(this.pos.x, Animated.divide(this.size.width, 2));
+                const centerY = Animated.subtract(this.pos.y, Animated.divide(this.size.height, 2));
+                return {x: centerX, y: centerY, width: this.size.width, height: this.size.height};
         }
     }
 
@@ -94,12 +110,26 @@ export class Rectangle {
         const corner1 = r1[0].getCorner(r1[1]);
         const corner2 = r2[0].getCorner(r2[1]);
 
+        let width, height, x, y: AnimNum;
+
+        if (corner1.x > corner2.x) {
+            width = Animated.subtract(corner1.x, corner2.x);
+            x = corner2.x;
+        } else {
+            width = Animated.subtract(corner2.x, corner1.x);
+            x = corner1.x;
+        }
+        if (corner1.y > corner2.y) {
+            height = Animated.subtract(corner1.y, corner2.y);
+            y = corner2.y;
+        } else {
+            height = Animated.subtract(corner2.y, corner1.y);
+            y = corner1.y;
+        }
+
         return new Rectangle(
-            {
-                width: Math.abs(corner2.x - corner1.x),
-                height: Math.abs(corner2.y - corner1.y),
-            },
-            { x: Math.min(corner1.x, corner2.x), y: Math.min(corner1.y, corner2.y) }
+            { width: width, height: height},
+            { x: x, y: y },
         );
     }
 

@@ -1,55 +1,44 @@
-import { useWindowDimensions } from 'react-native'
-import "expo-router/entry"
+import React, { useRef, useState } from 'react';
+import { Button, Animated, useWindowDimensions } from 'react-native';
 import CommonUIRect from './CommonUI/CommonUIRect';
 import { Rectangle } from './geometry';
-import CommonUIButton from './CommonUI/CommonUIButton';
 
-const Home = () => {
+export default function SidebarExample() {
+    const [expanded, setExpanded] = useState(false);
+    const sidebarWidth = useRef(new Animated.Value(100)).current;
+
+    const toggle = () => {
+        Animated.timing(sidebarWidth, {
+        toValue: expanded ? 100 : 300,
+        duration: 300,
+        useNativeDriver: false,
+        }).start();
+        setExpanded(!expanded);
+    };
+
     const window = useWindowDimensions();
     const root = Rectangle.create({
         size: {width: window.width, height: window.height},
         pos: {x: 0, y: 0},
     });
 
-    const child = Rectangle.create({
-        size: {width: 100, height: 100},
-        rectCorners: [[root, "top-left"]],
-        ref: "top-left"
+    const sidebarRect = Rectangle.create({
+        size: { width: sidebarWidth, height: window.height - 20},
+        pos: { x: 0, y: 0 },
     });
-
-    const child2 = Rectangle.create({
-        size: {width: 50, height: 50},
-        rectCorners: [[root, "bottom-right"]],
-        ref: "bottom-right"
-    });
-
-    const child3 = Rectangle.create({
-        rectCorners: [[child, "bottom-right"], [child2, "top-left"]],
-    });
-
-    const child4 = Rectangle.create({
-        rectCorners: [[child3, "center"]],
-        size: {width: 200, height: 200},
-        ref: "center"
-    });
-
-    const child5 = Rectangle.create({
-        rectCorners: [[child4, "top-left"]],
-        size: {width: 150, height: 150},
-        ref: "top-left"
+    const contentRect = Rectangle.create({
+        size: { width: Animated.subtract(root.size.width, sidebarWidth), height: window.height },
+        pos: { x: sidebarWidth, y: 0 },
     });
 
     return (
         <>
-            <CommonUIRect rect={child} />
-            <CommonUIRect rect={child2} />
-            <CommonUIRect rect={child3}>
-                <CommonUIRect rect={child4}>
-                    <CommonUIRect rect={child5} />
-                </CommonUIRect>
+        <CommonUIRect rect={root}>
+            <CommonUIRect rect={sidebarRect}>
+                <Button title="Toggle" onPress={toggle} />
+                <CommonUIRect rect={contentRect} />
             </CommonUIRect>
+        </CommonUIRect>
         </>
-    )
+    );
 }
-
-export default Home;
