@@ -33,19 +33,21 @@ const Home = () => {
         ref: "center"
     });
 
+    const child5 = Rectangle.create({
+        rectCorners: [[child4, "top-left"]],
+        size: {width: 150, height: 150},
+        ref: "top-left"
+    });
+
     return (
         <>
             <CommonUIRect rect={child} />
             <CommonUIRect rect={child2} />
             <CommonUIRect rect={child3}>
-                <CommonUIRect rect={child4} parent={child3} padding={10}>
-                    <CommonUIButton onPress={() => {}} text='Hello'/>
-                    <CommonUIButton onPress={() => {}} text='World'/>
-                    <CommonUIButton onPress={() => {}} text='!'/>
+                <CommonUIRect rect={child4}>
+                    <CommonUIRect rect={child5} />
                 </CommonUIRect>
-                {/* Nesting Boxes not possible with previous implementation */}
             </CommonUIRect>
-            <CommonUIRect rect={child4} />
         </>
     )
 }
