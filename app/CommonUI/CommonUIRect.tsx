@@ -19,14 +19,14 @@ const CommonUIRect = ({ children, rect, padding }: Props) => {
         <Animated.View
             style={[
             styles.container,
-            {
-                left: Animated.subtract(mainRect.x as any, parentRect.x || 0),
-                top: Animated.subtract(mainRect.y as any, parentRect.y || 0),
-                width: mainRect.width as any,
-                height: mainRect.height as any,
-                padding: padding || 0,
-                gap: padding || 0,
-            },
+                {
+                    left: Animated.subtract(mainRect.x, parentRect.x || 0),
+                    top: Animated.subtract(mainRect.y, parentRect.y || 0),
+                    width: mainRect.width,
+                    height: mainRect.height,
+                    padding: padding || 0,
+                    gap: padding || 0,
+                },
             ]}
         >
             {children}

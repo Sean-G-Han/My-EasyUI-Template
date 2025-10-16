@@ -45,7 +45,7 @@ export default function SidebarExample() {
     });
 
     const child3 = Rectangle.create({
-        rectCorners: [[child, "top-left"], [child2, "bottom-right"]],
+        rectSides: [[child, "left"], [child2, "right"], [child2, "bottom"], [child, "top"]],
     });
 
     return (
