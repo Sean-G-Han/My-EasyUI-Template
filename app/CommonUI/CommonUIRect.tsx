@@ -1,19 +1,24 @@
 // CommonUI/CommonUIRect.tsx
 import React from 'react';
 import { Animated, StyleSheet } from 'react-native';
-import RectContext, { RectProvider } from '../RectContext';
-import { Rectangle } from '../geometry';
+import RectContext, { RectProvider } from '../EasyUI/RectContext';
+import { AnimMath, Rectangle } from '../EasyUI/geometry';
 
 type Props = {
     children?: React.ReactNode;
     padding?: number;
+    name?: string;
     rect: Rectangle;
 };
 
-const CommonUIRect = ({ children, rect, padding }: Props) => {
+const CommonUIRect = ({ children, rect, padding, name }: Props) => {
     const mainXYWH = rect.getXYWH();
     const parent = React.useContext(RectContext);
-
+    console.log(`
+Rendering Rect: ${name || 'unnamed'} 
+Position: (${AnimMath.toNumber(mainXYWH.x)}, ${AnimMath.toNumber(mainXYWH.y)})
+Size: (${AnimMath.toNumber(mainXYWH.width)} x ${AnimMath.toNumber(mainXYWH.height)})
+    `);
     return (
         <RectProvider value={{ x: mainXYWH.x, y: mainXYWH.y, parent: rect }}>
             <Animated.View

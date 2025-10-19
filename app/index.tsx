@@ -1,8 +1,9 @@
 import React, { useRef, useState } from 'react';
-import { Animated, useWindowDimensions } from 'react-native';
-import CommonUIRect from './EasyUI/CommonUI/CommonUIRect';
+import { Animated, useWindowDimensions, View } from 'react-native';
+import CommonUIRect from './CommonUI/CommonUIRect';
 import { Rectangle } from './EasyUI/geometry';
-import CommonUIButton from './EasyUI/CommonUI/CommonUIButton';
+import CommonUIButton from './CommonUI/CommonUIButton';
+import CommonUISideBar from './CommonUI/CommonUISideBar';
 
 export default function SidebarExample() {
     const [expanded, setExpanded] = useState(false);
@@ -56,7 +57,13 @@ export default function SidebarExample() {
                 <CommonUIRect rect={contentRect}>
                     <CommonUIRect rect={child} />
                     <CommonUIRect rect={child2} />
-                    <CommonUIRect rect={child3} />
+                    <CommonUIRect rect={child3} name="Child 3">
+                        <CommonUISideBar direction="right" width={200} cellHeight={80}>
+                            <CommonUIButton text="Button in Sidebar" onPress={() => {}} />
+                            <CommonUIButton text="Another Button" onPress={() => {}} />
+                            <CommonUIButton text="Third Button" onPress={() => {}} />
+                        </CommonUISideBar>
+                    </CommonUIRect>
                 </CommonUIRect>
             </CommonUIRect>
         </CommonUIRect>

@@ -6,7 +6,7 @@ export type Point = "top-left" | "top-right" | "center" | "bottom-left" | "botto
 
 export type Side = "top" | "right" | "bottom" | "left";
 
-export type Direction = "center" | "left" | "right" | "up" | "down";
+export type Direction = "left" | "right" | "up" | "down";
 
 export type Size = {
     width: AnimNum;
@@ -27,15 +27,23 @@ export type Constraint = {
     rectCorners?: Array<[Rectangle, Point]>;
     rectSides?: Array<[Rectangle, Side]>;
     growDirection?: Direction;
-    growSize?: number;
+    growSize?: AnimNum;
 }
 
-class AnimMath {
+export class AnimMath {
     static toAnimated(value: AnimNum): Animated.Value {
         if (typeof value === "number") {
             return new Animated.Value(value);
         } else {
             return value as Animated.Value;
+        }
+    }
+
+    static toNumber(value: AnimNum): number {
+        if (typeof value === "number") {
+            return value;
+        } else {
+            return (value as any).__getValue();
         }
     }
 
@@ -123,6 +131,7 @@ export class Rectangle {
         }
     }
 
+    // Returns XYWH based on top left everytime
     getXYWH(): XYWH {
         switch(this.referencePoint) {
             case "top-left":
@@ -193,6 +202,37 @@ export class Rectangle {
         );
     }
 
+    private static fromSideAndGrowDirection(side: [Rectangle, Side], growDirection: Direction, growSize: AnimNum): Rectangle {
+        const sideXYWH = side[0].getXYWH();
+        const sidePos = side[0].getSide(side[1]);
+        const sideName = side[1];
+        let pos: Pos;
+        let size: Size;
+
+        if (sideName == "top" || sideName == "bottom") {
+            if (growDirection == "left" || growDirection == "right") {
+                return this.empty();
+            }
+        } else if (sideName == "left" || sideName == "right") {
+            if (growDirection == "up" || growDirection == "down") {
+                return this.empty();
+            }
+        }
+
+        if (growDirection === "left" || growDirection === "right") {
+            size = { width: growSize, height: sideXYWH.height };
+            pos = { x: sidePos, y: sideXYWH.y };
+            let referencePoint: Point = growDirection === "left" ? "top-right" : "top-left";
+            return new Rectangle(size, pos, referencePoint);
+        } else if (growDirection === "up" || growDirection === "down") {
+            size = { width: sideXYWH.width, height: growSize };
+            pos = { x: sideXYWH.x, y: sidePos };
+            let referencePoint: Point = growDirection === "up" ? "bottom-left" : "top-left";
+            return new Rectangle(size, pos, referencePoint);
+        }
+        return this.empty();
+    }
+
     private static empty(): Rectangle {
         // TODO: Throw error instead?
         return new Rectangle({ width: 0, height: 0 }, { x: 0, y: 0 });
@@ -213,7 +253,10 @@ export class Rectangle {
             return this.fromCornerAndSize(r1, constraint.size, constraint.refCorner);
         } else if (constraint.rectSides && constraint.rectSides.length === 4) {
             return this.fromFourSides(constraint.rectSides);
-        } // TODO: More Constraint combinations
+        } else if (constraint.rectSides && constraint.rectSides.length === 1 && constraint.growDirection && constraint.growSize) {
+            const [side] = constraint.rectSides;
+            return this.fromSideAndGrowDirection(side, constraint.growDirection, constraint.growSize);
+        }
 
         return this.empty();
     }
