@@ -55,7 +55,7 @@ type Props = {
     height?: number;
 };
 
-const CommonUITextField: React.FC<Props> = ({
+const CUITextField: React.FC<Props> = ({
     type = "text",
     placeholder = "",
     value,
@@ -81,7 +81,7 @@ const CommonUITextField: React.FC<Props> = ({
     );
 };
 
-export default CommonUITextField;
+export default CUITextField;
 
 const styles = StyleSheet.create({
   input: {

@@ -1,17 +1,18 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native'
 import React from 'react'
 import RectContext, { RectProvider } from '../RectContext';
 import { AnimNum, Rectangle, Side } from '../geometry';
-import CommonUIRect from './CommonUIRect';
+import CUIRect from './CUIRect';
 
 type Props = {
     direction?: 'left' | 'right';
     width?: AnimNum;
     cellHeight?: AnimNum;
     children?: React.ReactNode;
+    style?: StyleProp<ViewStyle>;
 }
 
-const CommonUISideBar = ({ direction, width, cellHeight, children }: Props) => {
+const CUISideBar = ({ direction, width, cellHeight, children, style }: Props) => {
     const { x, y, parent } = React.useContext(RectContext);
     const sidebarRect = Rectangle.create({
         rectSides: [[parent!, direction === 'left' ? 'left' : 'right']],
@@ -21,8 +22,10 @@ const CommonUISideBar = ({ direction, width, cellHeight, children }: Props) => {
     let topElement: Rectangle = sidebarRect
     const rectArray = React.Children.map(children, (child) => {
         let rectSide: [Rectangle, Side] = [topElement, 'bottom'];
+
         if (topElement === sidebarRect)
             rectSide = [topElement, 'top'];
+
         let rect = Rectangle.create({
             rectSides: [rectSide],
             growDirection: 'down',
@@ -34,17 +37,17 @@ const CommonUISideBar = ({ direction, width, cellHeight, children }: Props) => {
 
     return (
         <RectProvider value={{ x: x, y: y, parent: parent }}>
-            <CommonUIRect rect={sidebarRect}>
+            <CUIRect rect={sidebarRect} style={style}>
                 {rectArray && rectArray.map((rect, index) => (
-                    <CommonUIRect rect={rect}>
+                    <CUIRect rect={rect} key={index}>
                         {React.Children.toArray(children)[index]}
-                    </CommonUIRect>
+                    </CUIRect>
                 ))}
-            </CommonUIRect>
+            </CUIRect>
         </RectProvider>
     )
 }
 
-export default CommonUISideBar
+export default CUISideBar
 
 const styles = StyleSheet.create({})
