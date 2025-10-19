@@ -28,9 +28,6 @@ git submodule update --init --recursive
 
 Use them in your JSX like any other React Native component:
 ```
-    const [expanded, setExpanded] = useState(false);
-    const sidebarWidth = useRef(new Animated.Value(100)).current;
-
     const window = useWindowDimensions();
     const root = Rectangle.create({
         size: {width: window.width, height: window.height},
