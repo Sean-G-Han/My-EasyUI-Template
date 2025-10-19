@@ -7,7 +7,7 @@ import CUIMenuButton from './EasyUI/CommonUI/CUISideBarBtn';
 
 export default function Example() {
     const [expanded, setExpanded] = useState(false);
-    const sidebarWidth = useRef(new Animated.Value(70)).current;
+    const sidebarWidth = useRef(new Animated.Value(60)).current;
 
     const toggle = () => {
         Animated.timing(sidebarWidth, {
@@ -27,10 +27,10 @@ export default function Example() {
 
     return (
         <CUIRect rect={root}>
-            <CUISideBar direction="left" width={sidebarWidth} cellHeight={60} style={{ backgroundColor: 'lightgray' }}>
-                <CUIMenuButton alignment="left" padding={15} fontSize={14} text="Menu" displayWidth={100} iconName="menu" onPress={toggle} />
-                <CUIMenuButton alignment="left" padding={15} fontSize={14} text="Attendance" displayWidth={100} iconName="timer" onPress={() => {console.log('Attendance pressed')}} />
-                <CUIMenuButton alignment="left" padding={15} fontSize={14} text="Home" displayWidth={100} iconName="home" onPress={() => {console.log('Menu pressed')}} />
+            <CUISideBar direction="left" width={sidebarWidth} cellHeight={60} style={{ backgroundColor: 'black' }}>
+                <CUIMenuButton alignment="left" padding={15} fontSize={14} text="Menu" displayWidth={100} iconName="menu" colour='white' onPress={toggle} />
+                <CUIMenuButton alignment="left" padding={15} fontSize={14} text="Attendance" displayWidth={100} iconName="timer" colour='white' onPress={() => {console.log('Attendance pressed')}} />
+                <CUIMenuButton alignment="left" padding={15} fontSize={14} text="Home" displayWidth={100} iconName="home" colour='white' onPress={() => {console.log('Menu pressed')}} />
             </CUISideBar>
         </CUIRect>
     );

@@ -6,21 +6,22 @@ import CUIRect from './CUIRect';
 import { Ionicons } from '@expo/vector-icons';
 
 type Props = {
-    alignment: 'left' | 'center' | 'right';
+    alignment: 'left' | 'right';
     padding?: number;
     iconName: string;
     text?: string;
     fontSize?: number;
+    colour?: string;
     displayWidth?: number;
     onPress: () => void;
 }
 
-const CUISideBarBtn = ({ alignment, iconName, text, displayWidth, onPress, padding = 10, fontSize=12 }: Props) => {
+const CUISideBarBtn = ({ alignment, iconName, text, displayWidth, onPress, padding = 10, fontSize=12, colour='black' }: Props) => {
     const { x, y, parent } = React.useContext(RectContext);
     if (!parent) return null;
 
-    const corner = alignment === 'left' ? 'top-left' : alignment === 'center' ? 'center' : 'top-right';
-    const refCorner = alignment === 'left' ? 'top-left' : alignment === 'center' ? 'center' : 'top-right';
+    const corner = alignment === 'left' ? 'top-left' : 'top-right';
+    const refCorner = alignment === 'left' ? 'top-left' : 'top-right';
     const dimension = parent.getXYWH().height;
 
     const buttonContainer = Rectangle.create({
@@ -45,7 +46,7 @@ const CUISideBarBtn = ({ alignment, iconName, text, displayWidth, onPress, paddi
     return (
         <CUIRect rect={buttonContainer}>
             <TouchableOpacity onPress={onPress} style={padding ? { padding } : {}}>
-                <Ionicons name={iconName as any} size={AnimMath.toNumber(dimension) - 2*(padding || 0)} color="black"/>
+                <Ionicons name={iconName as any} size={AnimMath.toNumber(dimension) - 2*(padding || 0)} color={colour}/>
                 <CUIRect rect={textContainer}>
                     <Animated.View style={{
                         flex: 1,
@@ -59,6 +60,7 @@ const CUISideBarBtn = ({ alignment, iconName, text, displayWidth, onPress, paddi
                             opacity: opacity,
                             fontSize: fontSize,
                             textAlign: alignment,
+                            color: colour,
                         }}
                         >
                         {text}
