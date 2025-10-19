@@ -11,27 +11,27 @@ type Props = {
 };
 
 const CommonUIRect = ({ children, rect, padding }: Props) => {
-  const mainRect = rect.getRect();
-  const parentRect = React.useContext(RectContext);
+    const mainXYWH = rect.getXYWH();
+    const parent = React.useContext(RectContext);
 
-  return (
-    <RectProvider value={{ x: mainRect.x as any, y: mainRect.y as any }}>
-        <Animated.View
-            style={[
-            styles.container,
-                {
-                    left: Animated.subtract(mainRect.x, parentRect.x || 0),
-                    top: Animated.subtract(mainRect.y, parentRect.y || 0),
-                    width: mainRect.width,
-                    height: mainRect.height,
-                    padding: padding || 0,
-                    gap: padding || 0,
-                },
-            ]}
-        >
-            {children}
-        </Animated.View>
-    </RectProvider>
+    return (
+        <RectProvider value={{ x: mainXYWH.x, y: mainXYWH.y, parent: rect }}>
+            <Animated.View
+                style={[
+                styles.container,
+                    {
+                        left: Animated.subtract(mainXYWH.x, parent.x || 0),
+                        top: Animated.subtract(mainXYWH.y, parent.y || 0),
+                        width: mainXYWH.width,
+                        height: mainXYWH.height,
+                        padding: padding || 0,
+                        gap: padding || 0,
+                    },
+                ]}
+            >
+                {children}
+            </Animated.View>
+        </RectProvider>
     );
 };
 

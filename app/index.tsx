@@ -35,13 +35,13 @@ export default function SidebarExample() {
     const child = Rectangle.create({
         size: { width: 50, height: 50 },
         rectCorners: [[contentRect, "bottom-right"]],
-        ref: "bottom-right",
+        refCorner: "bottom-right",
     });
 
     const child2 = Rectangle.create({
         size: { width: 50, height: 50 },
         rectCorners: [[contentRect, "top-left"]],
-        ref: "top-left",
+        refCorner: "top-left",
     });
 
     const child3 = Rectangle.create({
