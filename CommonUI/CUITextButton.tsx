@@ -23,7 +23,7 @@ type Props = {
     disabled?: boolean;
 };
 
-const CommonUIButton: React.FC<Props> = ({
+const CUIButton: React.FC<Props> = ({
     type = "primary",
     text,
     onPress,
@@ -48,7 +48,7 @@ const CommonUIButton: React.FC<Props> = ({
     );
 };
 
-export default CommonUIButton;
+export default CUIButton;
 
 const styles = StyleSheet.create({
     button: {
