@@ -1,7 +1,7 @@
 // CommonUI/CommonUIRect.tsx
 import React from 'react';
 import { Animated, StyleSheet } from 'react-native';
-import RectContext, { RectProvider } from './RectContext';
+import RectContext, { RectProvider } from '../RectContext';
 import { Rectangle } from '../geometry';
 
 type Props = {

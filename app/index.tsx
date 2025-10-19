@@ -1,8 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { Button, Animated, useWindowDimensions } from 'react-native';
-import CommonUIRect from './CommonUI/CommonUIRect';
-import { Rectangle } from './geometry';
-import CommonUIButton from './CommonUI/CommonUIButton';
+import { Animated, useWindowDimensions } from 'react-native';
+import CommonUIRect from './EasyUI/CommonUI/CommonUIRect';
+import { Rectangle } from './EasyUI/geometry';
+import CommonUIButton from './EasyUI/CommonUI/CommonUIButton';
 
 export default function SidebarExample() {
     const [expanded, setExpanded] = useState(false);

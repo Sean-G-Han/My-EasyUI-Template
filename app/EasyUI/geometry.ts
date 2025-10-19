@@ -156,7 +156,6 @@ export class Rectangle {
         const corner1 = r1[0].getCorner(r1[1]);
         const corner2 = r2[0].getCorner(r2[1]);
 
-
         return new Rectangle(
             { 
                 width: AnimMath.Abs(Animated.subtract(corner2.x, corner1.x)),
