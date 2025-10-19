@@ -23,7 +23,7 @@ export type XYWH = Pos & Size;
 export type Constraint = {
     pos?: Pos;
     size?: Size;
-    ref?: Point;
+    refCorner?: Point;
     rectCorners?: Array<[Rectangle, Point]>;
     rectSides?: Array<[Rectangle, Side]>;
     growDirection?: Direction;
@@ -88,7 +88,7 @@ export class Rectangle {
     }
 
     getSide(side: Side): AnimNum {
-        const rect = this.getRect();
+        const rect = this.getXYWH();
         switch(side) {
             case "top":
                 return rect.y;
@@ -102,7 +102,7 @@ export class Rectangle {
     }
 
     getCorner(point: Point): Pos {
-        const rect = this.getRect();
+        const rect = this.getXYWH();
         switch(point) {
             case "top-left":
                 return {x: rect.x, y: rect.y};
@@ -123,7 +123,7 @@ export class Rectangle {
         }
     }
 
-    getRect(): XYWH {
+    getXYWH(): XYWH {
         switch(this.referencePoint) {
             case "top-left":
                 return {x: this.pos.x, y: this.pos.y, width: this.size.width, height: this.size.height};
@@ -144,8 +144,8 @@ export class Rectangle {
         }
     }
 
-    private static fromSizePosRef(size: Size, pos: Pos, ref: Point): Rectangle {
-        return new Rectangle(size, pos, ref);
+    private static fromSizePosRef(size: Size, pos: Pos, refCorner: Point): Rectangle {
+        return new Rectangle(size, pos, refCorner);
     }
 
     private static fromSizePos(size: Size, pos: Pos): Rectangle {
@@ -165,9 +165,9 @@ export class Rectangle {
         );
     }
 
-    private static fromCornerAndSize(r: [Rectangle, Point], size: Size, ref: Point): Rectangle {
+    private static fromCornerAndSize(r: [Rectangle, Point], size: Size, refCorner: Point): Rectangle {
         const pos = r[0].getCorner(r[1]);
-        return new Rectangle(size, pos, ref);
+        return new Rectangle(size, pos, refCorner);
     }
 
     private static fromFourSides(sides: [Rectangle, Side][]): Rectangle {
@@ -201,16 +201,16 @@ export class Rectangle {
     static create(constraint: Constraint): Rectangle {
         constraint = constraint || {};
 
-        if (constraint.size && constraint.pos && constraint.ref) {
-            return this.fromSizePosRef(constraint.size, constraint.pos, constraint.ref);
+        if (constraint.size && constraint.pos && constraint.refCorner) {
+            return this.fromSizePosRef(constraint.size, constraint.pos, constraint.refCorner);
         } else if (constraint.size && constraint.pos) {
             return this.fromSizePos(constraint.size, constraint.pos);
         } else if (constraint.rectCorners && constraint.rectCorners.length === 2) {
             const [r1, r2] = constraint.rectCorners;
             return this.fromTwoCorners(r1, r2);
-        } else if (constraint.rectCorners && constraint.rectCorners.length === 1 && constraint.size && constraint.ref) {
+        } else if (constraint.rectCorners && constraint.rectCorners.length === 1 && constraint.size && constraint.refCorner) {
             const [r1] = constraint.rectCorners;
-            return this.fromCornerAndSize(r1, constraint.size, constraint.ref);
+            return this.fromCornerAndSize(r1, constraint.size, constraint.refCorner);
         } else if (constraint.rectSides && constraint.rectSides.length === 4) {
             return this.fromFourSides(constraint.rectSides);
         } // TODO: More Constraint combinations
