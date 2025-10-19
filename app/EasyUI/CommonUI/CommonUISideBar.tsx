@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-import RectContext, { RectProvider } from '../EasyUI/RectContext';
-import { AnimNum, Rectangle, Side } from '../EasyUI/geometry';
+import RectContext, { RectProvider } from '../RectContext';
+import { AnimNum, Rectangle, Side } from '../geometry';
 import CommonUIRect from './CommonUIRect';
 
 type Props = {

@@ -1,8 +1,8 @@
 // CommonUI/CommonUIRect.tsx
 import React from 'react';
 import { Animated, StyleSheet } from 'react-native';
-import RectContext, { RectProvider } from '../EasyUI/RectContext';
-import { AnimMath, Rectangle } from '../EasyUI/geometry';
+import RectContext, { RectProvider } from '../RectContext';
+import { AnimMath, Rectangle } from '../geometry';
 
 type Props = {
     children?: React.ReactNode;
