@@ -42,7 +42,7 @@ export default CUIRect;
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        //borderWidth: 1,
-        //borderColor: 'black',
+        borderWidth: 1,
+        borderColor: 'black',
     },
 });

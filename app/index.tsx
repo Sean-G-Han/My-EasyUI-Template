@@ -51,11 +51,18 @@ export default function Example() {
                         refCorner: "top-left",
                         size: { width: 100, height: 100 },
                     });
-                    const childElement = (
-                        <CUIButton text="Click Me" onPress={() => {console.log('Button in ScrollBoxItem pressed')}} />
-                    );
-                    return [{ rect: childRect, element: childElement }];
-                }} />
+                    return [{ rect: childRect }];
+                }}/>
+                <CUIScrollBoxItem height={300}>
+                    <CUIRelativeBox factory={(selfRect) => {
+                        const childRect = Rectangle.create({
+                            rectCorners: [[selfRect, "top-left"]],
+                            refCorner: "top-left",
+                            size: { width: 100, height: 100 },
+                        });
+                        return [{ rect: childRect }];
+                    }}/>
+                </CUIScrollBoxItem>
             </CUIScrollBox>
         </CUIRect>
     );
