@@ -85,11 +85,12 @@ export class AnimMath {
 }
 
 export type RectWithContent = {
-  rect: Rectangle;
-  element?: React.ReactNode;
+    rect: Rectangle;
+    element?: React.ReactNode;
 };
 
 export type RectFactory = (parent: Rectangle) => RectWithContent[];
+
 export class Rectangle {
     size: Size;
     pos: Pos;
