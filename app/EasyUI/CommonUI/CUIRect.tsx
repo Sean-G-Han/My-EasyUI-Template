@@ -2,7 +2,7 @@
 import React from 'react';
 import { Animated, StyleProp, StyleSheet, ViewStyle } from 'react-native';
 import RectContext, { RectProvider } from '../RectContext';
-import { AnimMath, Rectangle } from '../geometry';
+import { Rectangle } from '../geometry';
 
 type Props = {
     children?: React.ReactNode;
@@ -42,7 +42,7 @@ export default CUIRect;
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        borderWidth: 1,
-        borderColor: 'black',
+        //borderWidth: 1,
+        //borderColor: 'black',
     },
 });

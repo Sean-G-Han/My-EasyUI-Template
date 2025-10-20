@@ -84,6 +84,12 @@ export class AnimMath {
     }
 }
 
+export type RectWithContent = {
+  rect: Rectangle;
+  element?: React.ReactNode;
+};
+
+export type RectFactory = (parent: Rectangle) => RectWithContent[];
 export class Rectangle {
     size: Size;
     pos: Pos;
@@ -259,5 +265,10 @@ export class Rectangle {
         }
 
         return this.empty();
+    }
+
+    public toString(): string {
+        const xywh = this.getXYWH();    
+        return `Rectangle(x: ${AnimMath.toNumber(xywh.x)}, y: ${AnimMath.toNumber(xywh.y)}, width: ${AnimMath.toNumber(xywh.width)}, height: ${AnimMath.toNumber(xywh.height)})`;
     }
 }
