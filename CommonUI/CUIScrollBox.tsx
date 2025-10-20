@@ -37,8 +37,8 @@ export default CUIScrollBox;
 
 const styles = StyleSheet.create({
     scrollView: {
-        backgroundColor: 'red',
-        borderWidth: 1,
-        borderColor: 'black',
+        //backgroundColor: 'red',
+        //borderWidth: 1,
+        //borderColor: 'black',
     }
 });
