@@ -2,7 +2,7 @@ import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native'
 import React from 'react'
 import RectContext, { RectProvider } from '../RectContext';
 import { AnimNum, Rectangle, Side } from '../geometry';
-import CUIRect from './CUIRect';
+import CUIAbsoluteBox from './CUIAbsoluteBox';
 
 type Props = {
     rect: Rectangle;
@@ -34,13 +34,13 @@ const CUIVBox = ({ rect, cellHeight, children, style, reverse = false }: Props) 
 
     return (
         <RectProvider value={{ x: x, y: y, parent: parent }}>
-            <CUIRect rect={rect} style={style}>
+            <CUIAbsoluteBox rect={rect} style={style}>
                 {rectArray && rectArray.map((rect, index) => (
-                    <CUIRect rect={rect} key={index}>
+                    <CUIAbsoluteBox rect={rect} key={index}>
                         {React.Children.toArray(children)[index]}
-                    </CUIRect>
+                    </CUIAbsoluteBox>
                 ))}
-            </CUIRect>
+            </CUIAbsoluteBox>
         </RectProvider>
     )
 }

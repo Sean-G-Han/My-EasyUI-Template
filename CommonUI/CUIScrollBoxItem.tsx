@@ -23,9 +23,3 @@ const CUIScrollBoxItem = ({ height, factory, children }: Props) => {
 }
 
 export default CUIScrollBoxItem
-
-const styles = StyleSheet.create({
-    container: {
-        position: 'relative',
-    },
-})
