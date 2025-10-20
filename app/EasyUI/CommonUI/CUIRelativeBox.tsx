@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import React from "react";
 import { Rectangle, RectFactory, Size } from "../geometry";
 import RectContext, { RectProvider } from "../RectContext";
-import CUIRect from "./CUIRect";
+import CUIAbsoluteBox from "./CUIAbsoluteBox";
 
 type Props = {
     factory: RectFactory;
@@ -24,16 +24,11 @@ const CUIRelativeBox = ({ factory }: Props) => {
 
     return (
         <RectProvider value={{ x: 0, y: 0, parent: selfRect }}>
-            <View
-                style={[
-                    styles.container,
-                    { width: boxSize.width, height: boxSize.height },
-                ]}
-            >
+            <View style={[{ width: boxSize.width, height: boxSize.height }]}>
                 {childRects.map((item, idx) => (
-                    <CUIRect key={idx} rect={item.rect}>
+                    <CUIAbsoluteBox key={idx} rect={item.rect}>
                         {item.element}
-                    </CUIRect>
+                    </CUIAbsoluteBox>
                 ))}
             </View>
         </RectProvider>
@@ -41,10 +36,3 @@ const CUIRelativeBox = ({ factory }: Props) => {
 };
 
 export default CUIRelativeBox;
-
-const styles = StyleSheet.create({
-  container: {
-    //position: "relative",
-    //backgroundColor: "lightgray",
-  },
-});

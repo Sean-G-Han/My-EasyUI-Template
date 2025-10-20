@@ -1,4 +1,4 @@
-// CUI/CUIRect.tsx
+// CUI/CUIAbsoluteBox.tsx
 import React from 'react';
 import { Animated, StyleProp, StyleSheet, ViewStyle } from 'react-native';
 import RectContext, { RectProvider } from '../RectContext';
@@ -12,32 +12,27 @@ type Props = {
     style?: StyleProp<ViewStyle>;
 };
 
-const CUIRect = ({ children, rect, padding, name, style }: Props) => {
+const CUIAbsoluteBox = ({ children, rect, padding, name, style }: Props) => {
     const mainXYWH = rect.getXYWH();
     const parent = React.useContext(RectContext);
+    const mainStyle = {
+        left: Animated.subtract(mainXYWH.x, parent.x || 0),
+        top: Animated.subtract(mainXYWH.y, parent.y || 0),
+        width: mainXYWH.width,
+        height: mainXYWH.height,
+        padding: padding || 0,
+        gap: padding || 0,
+    };
     return (
         <RectProvider value={{ x: mainXYWH.x, y: mainXYWH.y, parent: rect }}>
-            <Animated.View
-                style={[
-                    styles.container,
-                    {
-                        left: Animated.subtract(mainXYWH.x, parent.x || 0),
-                        top: Animated.subtract(mainXYWH.y, parent.y || 0),
-                        width: mainXYWH.width,
-                        height: mainXYWH.height,
-                        padding: padding || 0,
-                        gap: padding || 0,
-                    },
-                    style
-                ]}
-            >
+            <Animated.View style={[ styles.container, mainStyle, style ]}>
                 {children}
             </Animated.View>
         </RectProvider>
     );
 };
 
-export default CUIRect;
+export default CUIAbsoluteBox;
 
 const styles = StyleSheet.create({
     container: {

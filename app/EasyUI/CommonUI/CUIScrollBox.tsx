@@ -12,21 +12,15 @@ type Props = {
 const CUIScrollBox = ({ rect, children, style }: Props) => {
     const mainXYWH = rect.getXYWH();
     const parent = React.useContext(RectContext);
+    const mainStyle = {
+        left: Animated.subtract(mainXYWH.x, parent.x || 0),
+        top: Animated.subtract(mainXYWH.y, parent.y || 0),
+        width: mainXYWH.width,
+        height: mainXYWH.height,
+    };
     return (
-        <Animated.ScrollView
-            style={[
-                styles.scrollView,
-                {
-                    position: "absolute",
-                    left: Animated.subtract(mainXYWH.x, parent.x || 0),
-                    top: Animated.subtract(mainXYWH.y, parent.y || 0),
-                    width: mainXYWH.width,
-                    height: mainXYWH.height,
-                },
-                style,
-            ]}
-        >
-            <RectContext.Provider value={{ x: mainXYWH.x, y: mainXYWH.y, parent: rect}}>
+        <Animated.ScrollView style={[ styles.container, mainStyle, style ]}>
+            <RectContext.Provider value={{ x: 0, y: 0, parent: rect}}>
                 {children}
             </RectContext.Provider>
         </Animated.ScrollView>
@@ -36,7 +30,8 @@ const CUIScrollBox = ({ rect, children, style }: Props) => {
 export default CUIScrollBox;
 
 const styles = StyleSheet.create({
-    scrollView: {
+    container: {
+        position: "absolute",
         //backgroundColor: 'red',
         //borderWidth: 1,
         //borderColor: 'black',
