@@ -1,4 +1,5 @@
-import { Animated } from "react-native";
+import { Animated, View, ViewStyle } from "react-native";
+import { RectRegistry } from "./RectRegistry";
 
 export type AnimNum = number | Animated.Value | Animated.AnimatedNode;
 
@@ -80,24 +81,50 @@ export class AnimMath {
         );
         return max;
     }
+    
+    static Equal(v1: AnimNum, v2: AnimNum): boolean{
+        const a = this.toNumber(v1);
+        const b = this.toNumber(v2);
+        return a === b;
+    }
 }
 
 export type RectWithContent = {
     rect: Rectangle;
     element?: React.ReactNode;
+    style?: ViewStyle;
 };
 
 export type RectFactory = (parent: Rectangle) => RectWithContent[];
 
 export class Rectangle {
+    name: string;
     size: Size;
     pos: Pos;
     referencePoint: Point = "top-left";
-    constructor(size: Size, pos: Pos, referencePoint?: Point) {
+    constructor(size: Size, pos: Pos, referencePoint?: Point, name?: string) {
         this.size = size;
         this.pos = pos;
         if (referencePoint)
             this.referencePoint = referencePoint;
+        if (name) {
+            if (!RectRegistry.hasRect(name)) {
+                this.name = name;
+            } else {
+                let randomID: string;
+                do {
+                    randomID = `_${Math.random().toString(36).slice(2, 11)}`;
+                } while (RectRegistry.hasRect(name + randomID));
+                this.name = name + randomID;
+            }
+            RectRegistry.registerRect(this);
+        } else {
+            let randomName: string;
+            do {
+                randomName = `rect_${Math.random().toString(36).slice(2, 11)}`;
+            } while (RectRegistry.hasRect(randomName));
+            this.name = randomName;
+        }
     }
 
     getSide(side: Side): AnimNum {
@@ -158,15 +185,15 @@ export class Rectangle {
         }
     }
 
-    private static fromSizePosRef(size: Size, pos: Pos, refCorner: Point): Rectangle {
-        return new Rectangle(size, pos, refCorner);
+    private static fromSizePosRef(size: Size, pos: Pos, refCorner: Point, name?: string): Rectangle {
+        return new Rectangle(size, pos, refCorner, name);
     }
 
-    private static fromSizePos(size: Size, pos: Pos): Rectangle {
-        return new Rectangle(size, pos, "top-left");
+    private static fromSizePos(size: Size, pos: Pos, name?: string): Rectangle {
+        return new Rectangle(size, pos, "top-left", name);
     }
 
-    private static from2Corners(r1: [Rectangle, Point], r2: [Rectangle, Point]): Rectangle {
+    private static from2Corners(r1: [Rectangle, Point], r2: [Rectangle, Point], name?: string): Rectangle {
         const corner1 = r1[0].getCorner(r1[1]);
         const corner2 = r2[0].getCorner(r2[1]);
 
@@ -176,15 +203,17 @@ export class Rectangle {
                 height: AnimMath.Abs(Animated.subtract(corner2.y, corner1.y)),
             },
             { x: AnimMath.Min(corner1.x, corner2.x), y: AnimMath.Min(corner1.y, corner2.y) },
+            "top-left",
+            name
         );
     }
 
-    private static fromCornerAndSize(r: [Rectangle, Point], size: Size, refCorner: Point): Rectangle {
+    private static fromCornerAndSize(r: [Rectangle, Point], size: Size, refCorner: Point, name?: string): Rectangle {
         const pos = r[0].getCorner(r[1]);
-        return new Rectangle(size, pos, refCorner);
+        return new Rectangle(size, pos, refCorner, name);
     }
 
-    private static from4Sides(sides: [Rectangle, Side][]): Rectangle {
+    private static from4Sides(sides: [Rectangle, Side][], name?: string): Rectangle {
         let constraintX: AnimNum[] = [];
         let constraintY: AnimNum[] = [];
         for (const side of sides) {
@@ -202,24 +231,24 @@ export class Rectangle {
         }
 
         return this.from2Corners(
-            [new Rectangle({width: 0, height: 0}, {x: constraintX[0], y: constraintY[0]}), "top-left"],
-            [new Rectangle({width: 0, height: 0}, {x: constraintX[1], y: constraintY[1]}), "bottom-right"]
+            [new Rectangle({width: 0, height: 0}, {x: constraintX[0], y: constraintY[0]}, "top-left", name), "top-left"],
+            [new Rectangle({width: 0, height: 0}, {x: constraintX[1], y: constraintY[1]}, "top-left", name), "bottom-right"]
         );
     }
 
-    private static from2AlignedCornersAndGD(corner1: [Rectangle, Point], corner2: [Rectangle, Point], growDirection: Side, growSize: AnimNum): Rectangle {
+    private static from2AlignedCornersAndGD(corner1: [Rectangle, Point], corner2: [Rectangle, Point], growDirection: Side, growSize: AnimNum, name?: string): Rectangle {
         const pos1 = corner1[0].getCorner(corner1[1]);
         const pos2 = corner2[0].getCorner(corner2[1]);
 
-        if (pos1.x !== pos2.x && pos1.y !== pos2.y) {
+        if (!AnimMath.Equal(pos1.x, pos2.x) && !AnimMath.Equal(pos1.y, pos2.y)) {
             return this.from2Corners(corner1, corner2);
         }
 
-        if (pos1.x === pos2.x && (growDirection === "bottom" || growDirection === "top")) {
+        if (AnimMath.Equal(pos1.x, pos2.x) && (growDirection === "bottom" || growDirection === "top")) {
             return this.empty();
         }
 
-        if (pos1.y === pos2.y && (growDirection === "left" || growDirection === "right")) {
+        if (AnimMath.Equal(pos1.y, pos2.y) && (growDirection === "left" || growDirection === "right")) {
             return this.empty();
         }
 
@@ -233,31 +262,31 @@ export class Rectangle {
                     width: growSize,
                     height: AnimMath.Abs(Animated.subtract(pos1.y, pos2.y)),
                 };
-                return new Rectangle(sizeLeft, pos, "top-right");
+                return new Rectangle(sizeLeft, pos, "top-right", name);
             case "right":
                 const sizeRight: Size = {
                     width: growSize,
                     height: AnimMath.Abs(Animated.subtract(pos1.y, pos2.y)),
                 };
-                return new Rectangle(sizeRight, pos, "top-left");
+                return new Rectangle(sizeRight, pos, "top-left", name);
             case "bottom":
                 const sizeBottom: Size = {
                     width: AnimMath.Abs(Animated.subtract(pos1.x, pos2.x)),
                     height: growSize,
                 };
-                return new Rectangle(sizeBottom, pos, "top-left");
+                return new Rectangle(sizeBottom, pos, "top-left", name);
             case "top":
                 const sizeTop: Size = {
                     width: AnimMath.Abs(Animated.subtract(pos1.x, pos2.x)),
                     height: growSize,
                 };
-                return new Rectangle(sizeTop, pos, "bottom-left");
+                return new Rectangle(sizeTop, pos, "bottom-left", name);
             default:
                 return this.empty();
         }
     }
 
-    private static fromSideAndGD(side: [Rectangle, Side], growDirection: Side, growSize: AnimNum): Rectangle {
+    private static fromSideAndGD(side: [Rectangle, Side], growDirection: Side, growSize: AnimNum, name?: string): Rectangle {
         const sideXYWH = side[0].getXYWH();
         const sidePos = side[0].getSide(side[1]);
         const sideName = side[1];
@@ -278,12 +307,12 @@ export class Rectangle {
             size = { width: growSize, height: sideXYWH.height };
             pos = { x: sidePos, y: sideXYWH.y };
             let referencePoint: Point = growDirection === "left" ? "top-right" : "top-left";
-            return new Rectangle(size, pos, referencePoint);
+            return new Rectangle(size, pos, referencePoint, name);
         } else if (growDirection === "top" || growDirection === "bottom") {
             size = { width: sideXYWH.width, height: growSize };
             pos = { x: sideXYWH.x, y: sidePos };
             let referencePoint: Point = growDirection === "top" ? "bottom-left" : "top-left";
-            return new Rectangle(size, pos, referencePoint);
+            return new Rectangle(size, pos, referencePoint, name);
         }
         return this.empty();
     }
@@ -293,31 +322,47 @@ export class Rectangle {
         return new Rectangle({ width: 0, height: 0 }, { x: 0, y: 0 });
     }
 
-    static create(constraint: Constraint): Rectangle {
+    static create(constraint: Constraint, name?: string): Rectangle {
         constraint = constraint || {};
 
+        let rect: Rectangle = this.empty();
+        let parentRect: Set<Rectangle> = new Set();
 
         if (constraint.size && constraint.pos && constraint.refCorner) {
-            return this.fromSizePosRef(constraint.size, constraint.pos, constraint.refCorner);
+            rect = this.fromSizePosRef(constraint.size, constraint.pos, constraint.refCorner, name);
         } else if (constraint.size && constraint.pos) {
-            return this.fromSizePos(constraint.size, constraint.pos);
+            rect = this.fromSizePos(constraint.size, constraint.pos, name);
         } else if (constraint.rectCorners && constraint.rectCorners.length === 2 && constraint.growDirection && constraint.growSize) {
             const [r1, r2] = constraint.rectCorners;
-            return this.from2AlignedCornersAndGD(r1, r2, constraint.growDirection, constraint.growSize);
+            parentRect.add(r1[0]);
+            parentRect.add(r2[0]);
+            rect = this.from2AlignedCornersAndGD(r1, r2, constraint.growDirection, constraint.growSize, name);
         } else if (constraint.rectCorners && constraint.rectCorners.length === 2) {
             const [r1, r2] = constraint.rectCorners;
-            return this.from2Corners(r1, r2);
+            parentRect.add(r1[0]);
+            parentRect.add(r2[0]);
+            rect = this.from2Corners(r1, r2, name);
         } else if (constraint.rectCorners && constraint.rectCorners.length === 1 && constraint.size && constraint.refCorner) {
             const [r1] = constraint.rectCorners;
-            return this.fromCornerAndSize(r1, constraint.size, constraint.refCorner);
+            parentRect.add(r1[0]);
+            rect = this.fromCornerAndSize(r1, constraint.size, constraint.refCorner, name);
         } else if (constraint.rectSides && constraint.rectSides.length === 4) {
-            return this.from4Sides(constraint.rectSides);
+            parentRect.add(constraint.rectSides[0][0]);
+            parentRect.add(constraint.rectSides[1][0]);
+            parentRect.add(constraint.rectSides[2][0]);
+            parentRect.add(constraint.rectSides[3][0]);
+            rect = this.from4Sides(constraint.rectSides, name);
         } else if (constraint.rectSides && constraint.rectSides.length === 1 && constraint.growDirection && constraint.growSize) {
             const [side] = constraint.rectSides;
-            return this.fromSideAndGD(side, constraint.growDirection, constraint.growSize);
+            parentRect.add(side[0]);
+            rect = this.fromSideAndGD(side, constraint.growDirection, constraint.growSize, name);
         }
 
-        return this.empty();
+        parentRect.forEach(element => {
+            RectRegistry.addRelation(element, rect);
+        });
+
+        return rect;
     }
 
     public toString(): string {
