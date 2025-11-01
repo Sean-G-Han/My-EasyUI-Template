@@ -34,7 +34,7 @@ const CUIHBox = ({ rect, cellWidth, children, style, reverse = false }: Props) =
 
     return (
         <RectProvider value={{ x: x, y: y, parent: parent }}>
-            <CUIAbsoluteBox rect={rect} style={style}>
+            <CUIAbsoluteBox rect={rect}>
                 {rectArray && rectArray.map((rect, index) => (
                     <CUIAbsoluteBox rect={rect} key={index}>
                         {React.Children.toArray(children)[index]}
@@ -46,5 +46,3 @@ const CUIHBox = ({ rect, cellWidth, children, style, reverse = false }: Props) =
 }
 
 export default CUIHBox
-
-const styles = StyleSheet.create({})
