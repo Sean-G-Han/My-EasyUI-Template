@@ -46,40 +46,33 @@ export class AnimMath {
         }
     }
 
-    static Abs(value: AnimNum) {
-        const animValue = this.toAnimated(value);
-        return animValue.interpolate({
-            inputRange: [-10000, 0, 10000],
-            outputRange: [10000, 0, 10000],
-        });
+    static Abs(value: AnimNum): AnimNum {
+        const numericalValue = this.toNumber(value);
+        if (numericalValue >= 0) {
+            return value;
+        } else {
+            return Animated.multiply(this.toAnimated(value), -1);
+        }
     }
 
-    static Min(v1: AnimNum, v2: AnimNum) {
-        const a = this.toAnimated(v1);
-        const b = this.toAnimated(v2);
-        const diff = Animated.subtract(a, b);
-        const min = Animated.add(
-            b,
-            diff.interpolate({
-                inputRange: [-10000, 0, 10000],
-                outputRange: [-10000, 0, 0],
-            })
-        );
-        return min;
+    static Min(v1: AnimNum, v2: AnimNum): AnimNum {
+        const numericalValueA = this.toNumber(v1);
+        const numericalValueB = this.toNumber(v2);
+        if (numericalValueA < numericalValueB) {
+            return v1;
+        } else {
+            return v2;
+        }
     }
 
-    static Max(v1: AnimNum, v2: AnimNum) {
-        const a = this.toAnimated(v1);
-        const b = this.toAnimated(v2);
-        const diff = Animated.subtract(a, b);
-        const max = Animated.add(
-            b,
-            diff.interpolate({
-                inputRange: [-10000, 0, 10000],
-                outputRange: [0, 0, 10000],
-            })
-        );
-        return max;
+    static Max(v1: AnimNum, v2: AnimNum): AnimNum {
+        const numericalValueA = this.toNumber(v1);
+        const numericalValueB = this.toNumber(v2);
+        if (numericalValueA > numericalValueB) {
+            return v1;
+        } else {
+            return v2;
+        }
     }
     
     static Equal(v1: AnimNum, v2: AnimNum): boolean{

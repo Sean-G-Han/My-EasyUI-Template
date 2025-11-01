@@ -20,8 +20,6 @@ const CUIRelativeBox = ({ factory }: Props) => {
 
     const selfRect = new Rectangle(boxSize, { x: 0, y: 0 });
 
-    RectRegistry.addRelation(parent.parent!, selfRect);
-
     const childRects = factory(selfRect);
 
     return (
