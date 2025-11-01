@@ -86,7 +86,7 @@ If the library code in library-only is updated, pull the latest changes in your 
 
 `git submodule update --remote --merge`
 
-5. Why library-only Branch Exists
+### 5. Why library-only Branch Exists
 
 Git submodules always clone entire repositories, not individual folders.
 
