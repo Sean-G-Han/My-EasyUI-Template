@@ -1,4 +1,4 @@
-import { Animated, ScrollView, StyleSheet } from "react-native";
+import { Animated } from "react-native";
 import React from "react";
 import RectContext from "../RectContext";
 import { Rectangle } from "../geometry";

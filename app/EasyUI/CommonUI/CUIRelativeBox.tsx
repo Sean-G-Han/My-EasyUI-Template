@@ -1,9 +1,8 @@
-// CUIRelativeBox.tsx
-import { StyleSheet, View } from "react-native";
 import React from "react";
 import { Rectangle, RectFactory, Size } from "../geometry";
 import RectContext, { RectProvider } from "../RectContext";
 import CUIAbsoluteBox from "./CUIAbsoluteBox";
+import { RectRegistry } from "../RectRegistry";
 
 type Props = {
     factory: RectFactory;
@@ -11,6 +10,7 @@ type Props = {
 
 const CUIRelativeBox = ({ factory }: Props) => {
     const parent = React.useContext(RectContext);
+    const parentRect = parent?.parent;
 
     const boxSize: Size | undefined = parent?.parent?.getXYWH();
 
@@ -20,15 +20,22 @@ const CUIRelativeBox = ({ factory }: Props) => {
 
     const selfRect = new Rectangle(boxSize, { x: 0, y: 0 });
 
+    RectRegistry.addRelation(parent.parent!, selfRect);
+
     const childRects = factory(selfRect);
 
     return (
         <RectProvider value={{ x: 0, y: 0, parent: selfRect }}>
-            {childRects.map((item, idx) => (
-                <CUIAbsoluteBox key={idx} rect={item.rect}>
-                    {item.element}
-                </CUIAbsoluteBox>
-            ))}
+            {childRects.map((item, idx) => {
+                if (item.rect && parentRect) {
+                    RectRegistry.addRelation(parentRect, item.rect);
+                }
+                return (
+                    <CUIAbsoluteBox key={idx} rect={item.rect} style={item.style}>
+                        {item.element}
+                    </CUIAbsoluteBox>
+                );
+            })}
         </RectProvider>
     );
 };

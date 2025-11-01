@@ -1,18 +1,16 @@
-// CUI/CUIAbsoluteBox.tsx
 import React from 'react';
-import { Animated, StyleProp, StyleSheet, ViewStyle } from 'react-native';
+import { Animated, StyleProp, ViewStyle } from 'react-native';
 import RectContext, { RectProvider } from '../RectContext';
-import { Rectangle } from '../geometry';
+import { AnimMath, Rectangle } from '../geometry';
 
 type Props = {
     children?: React.ReactNode;
     padding?: number;
-    name?: string;
     rect: Rectangle;
     style?: StyleProp<ViewStyle>;
 };
 
-const CUIAbsoluteBox = ({ children, rect, padding, name, style }: Props) => {
+const CUIAbsoluteBox = ({ children, rect, padding, style }: Props) => {
     const mainXYWH = rect.getXYWH();
     const parent = React.useContext(RectContext);
     const mainStyle = {
@@ -24,6 +22,7 @@ const CUIAbsoluteBox = ({ children, rect, padding, name, style }: Props) => {
         padding: padding || 0,
         gap: padding || 0,
     };
+
     return (
         <RectProvider value={{ x: mainXYWH.x, y: mainXYWH.y, parent: rect }}>
             <Animated.View style={[ mainStyle, style ]}>
