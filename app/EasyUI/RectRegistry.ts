@@ -14,6 +14,29 @@ class RectRegistryNode {
         parent.children.push(child);
         child.parents.push(parent);
     }
+
+    treeString(level: number = 0, isLast: boolean = true, prefix: string = ""): string {
+        let result = "";
+
+        const branch = level === 0 ? "" : (isLast ? "└── " : "├── ");
+        result += prefix + branch + `${this.rect.name}\n`;
+
+        if (this.children && this.children.length > 0) {
+            const newPrefix = prefix + (level === 0 ? "" : (isLast ? "    " : "│   "));
+            const lastIndex = this.children.length - 1;
+
+            this.children.forEach((child, i) => {
+                const last = i === lastIndex;
+                result += child.treeString(level + 1, last, newPrefix);
+            });
+        }
+
+        return result;
+    }
+
+    toString(): string {
+        return `RectRegistryNode(${this.rect.name}) => Parents: [${this.parents?.map(p => p.rect.name).join(", ")}], Children: [${this.children?.map(c => c.rect.name).join(", ")}]`;
+    }
 }
 
 export class RectRegistry {
@@ -51,6 +74,16 @@ export class RectRegistry {
         return result;
     }
 
+    static treeString(nodeName: string, level: number = 0): string {
+
+        const node = this.registry.get(nodeName);
+        if (!node) {
+            return "";
+        }
+
+        return node.treeString(level);
+    }
+    
     static addRelation(parent: Rectangle, child: Rectangle) {
         const parentNode = this.registry.get(parent.name);
         const childNode = this.registry.get(child.name);
@@ -58,8 +91,13 @@ export class RectRegistry {
             RectRegistryNode.addRelation(parentNode, childNode);
         }
     }
+
+    static getRectNode(rectName: string): RectRegistryNode | undefined {
+        return this.registry.get(rectName);
+    }
 }
 
+// Apperently this allows you to just use in console
 if (typeof window !== "undefined") {
     (window as any).RectRegistry = RectRegistry;
 }

@@ -3,6 +3,7 @@ import React from 'react'
 import RectContext, { RectProvider } from '../RectContext'
 import { Rectangle, RectFactory } from '../geometry'
 import CUIRelativeBox from './CUIRelativeBox'
+import { RectRegistry } from '../RectRegistry'
 
 type Props = {
     height: number
@@ -16,7 +17,9 @@ const CUIScrollBoxItem = ({ height, factory, style }: Props) => {
         return null
     }
     const parentWidth = parent?.parent?.getXYWH().width || 0
-    const selfRect = new Rectangle({ width: parentWidth, height }, { x: 0, y: 0 })
+    const selfRect = new Rectangle({ width: parentWidth, height }, { x: 0, y: 0 }, "top-left", "scroll-box-item")
+
+    RectRegistry.addRelation(parent!.parent!, selfRect);
 
     return (
         <RectProvider value={{ x: 0, y: 0, parent: selfRect }}>
