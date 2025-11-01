@@ -24,13 +24,11 @@ const CUIRelativeBox = ({ factory }: Props) => {
 
     return (
         <RectProvider value={{ x: 0, y: 0, parent: selfRect }}>
-            <View style={[{ width: boxSize.width, height: boxSize.height }]}>
-                {childRects.map((item, idx) => (
-                    <CUIAbsoluteBox key={idx} rect={item.rect}>
-                        {item.element}
-                    </CUIAbsoluteBox>
-                ))}
-            </View>
+            {childRects.map((item, idx) => (
+                <CUIAbsoluteBox key={idx} rect={item.rect}>
+                    {item.element}
+                </CUIAbsoluteBox>
+            ))}
         </RectProvider>
     );
 };

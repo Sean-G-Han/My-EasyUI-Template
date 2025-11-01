@@ -6,8 +6,6 @@ export type Point = "top-left" | "top-right" | "center" | "bottom-left" | "botto
 
 export type Side = "top" | "right" | "bottom" | "left";
 
-export type Direction = "left" | "right" | "up" | "down";
-
 export type Size = {
     width: AnimNum;
     height: AnimNum;
@@ -26,7 +24,7 @@ export type Constraint = {
     refCorner?: Point;
     rectCorners?: Array<[Rectangle, Point]>;
     rectSides?: Array<[Rectangle, Side]>;
-    growDirection?: Direction;
+    growDirection?: Side;
     growSize?: AnimNum;
 }
 
@@ -168,7 +166,7 @@ export class Rectangle {
         return new Rectangle(size, pos, "top-left");
     }
 
-    private static fromTwoCorners(r1: [Rectangle, Point], r2: [Rectangle, Point]): Rectangle {
+    private static from2Corners(r1: [Rectangle, Point], r2: [Rectangle, Point]): Rectangle {
         const corner1 = r1[0].getCorner(r1[1]);
         const corner2 = r2[0].getCorner(r2[1]);
 
@@ -186,7 +184,7 @@ export class Rectangle {
         return new Rectangle(size, pos, refCorner);
     }
 
-    private static fromFourSides(sides: [Rectangle, Side][]): Rectangle {
+    private static from4Sides(sides: [Rectangle, Side][]): Rectangle {
         let constraintX: AnimNum[] = [];
         let constraintY: AnimNum[] = [];
         for (const side of sides) {
@@ -203,13 +201,63 @@ export class Rectangle {
             return this.empty();
         }
 
-        return this.fromTwoCorners(
+        return this.from2Corners(
             [new Rectangle({width: 0, height: 0}, {x: constraintX[0], y: constraintY[0]}), "top-left"],
             [new Rectangle({width: 0, height: 0}, {x: constraintX[1], y: constraintY[1]}), "bottom-right"]
         );
     }
 
-    private static fromSideAndGrowDirection(side: [Rectangle, Side], growDirection: Direction, growSize: AnimNum): Rectangle {
+    private static from2AlignedCornersAndGD(corner1: [Rectangle, Point], corner2: [Rectangle, Point], growDirection: Side, growSize: AnimNum): Rectangle {
+        const pos1 = corner1[0].getCorner(corner1[1]);
+        const pos2 = corner2[0].getCorner(corner2[1]);
+
+        if (pos1.x !== pos2.x && pos1.y !== pos2.y) {
+            return this.from2Corners(corner1, corner2);
+        }
+
+        if (pos1.x === pos2.x && (growDirection === "bottom" || growDirection === "top")) {
+            return this.empty();
+        }
+
+        if (pos1.y === pos2.y && (growDirection === "left" || growDirection === "right")) {
+            return this.empty();
+        }
+
+        const x = AnimMath.Min(pos1.x, pos2.x);
+        const y = AnimMath.Min(pos1.y, pos2.y);
+        const pos: Pos = {x: x, y: y};
+
+        switch(growDirection) {
+            case "left":
+                const sizeLeft: Size = {
+                    width: growSize,
+                    height: AnimMath.Abs(Animated.subtract(pos1.y, pos2.y)),
+                };
+                return new Rectangle(sizeLeft, pos, "top-right");
+            case "right":
+                const sizeRight: Size = {
+                    width: growSize,
+                    height: AnimMath.Abs(Animated.subtract(pos1.y, pos2.y)),
+                };
+                return new Rectangle(sizeRight, pos, "top-left");
+            case "bottom":
+                const sizeBottom: Size = {
+                    width: AnimMath.Abs(Animated.subtract(pos1.x, pos2.x)),
+                    height: growSize,
+                };
+                return new Rectangle(sizeBottom, pos, "top-left");
+            case "top":
+                const sizeTop: Size = {
+                    width: AnimMath.Abs(Animated.subtract(pos1.x, pos2.x)),
+                    height: growSize,
+                };
+                return new Rectangle(sizeTop, pos, "bottom-left");
+            default:
+                return this.empty();
+        }
+    }
+
+    private static fromSideAndGD(side: [Rectangle, Side], growDirection: Side, growSize: AnimNum): Rectangle {
         const sideXYWH = side[0].getXYWH();
         const sidePos = side[0].getSide(side[1]);
         const sideName = side[1];
@@ -221,7 +269,7 @@ export class Rectangle {
                 return this.empty();
             }
         } else if (sideName == "left" || sideName == "right") {
-            if (growDirection == "up" || growDirection == "down") {
+            if (growDirection == "top" || growDirection == "bottom") {
                 return this.empty();
             }
         }
@@ -231,10 +279,10 @@ export class Rectangle {
             pos = { x: sidePos, y: sideXYWH.y };
             let referencePoint: Point = growDirection === "left" ? "top-right" : "top-left";
             return new Rectangle(size, pos, referencePoint);
-        } else if (growDirection === "up" || growDirection === "down") {
+        } else if (growDirection === "top" || growDirection === "bottom") {
             size = { width: sideXYWH.width, height: growSize };
             pos = { x: sideXYWH.x, y: sidePos };
-            let referencePoint: Point = growDirection === "up" ? "bottom-left" : "top-left";
+            let referencePoint: Point = growDirection === "top" ? "bottom-left" : "top-left";
             return new Rectangle(size, pos, referencePoint);
         }
         return this.empty();
@@ -248,21 +296,25 @@ export class Rectangle {
     static create(constraint: Constraint): Rectangle {
         constraint = constraint || {};
 
+
         if (constraint.size && constraint.pos && constraint.refCorner) {
             return this.fromSizePosRef(constraint.size, constraint.pos, constraint.refCorner);
         } else if (constraint.size && constraint.pos) {
             return this.fromSizePos(constraint.size, constraint.pos);
+        } else if (constraint.rectCorners && constraint.rectCorners.length === 2 && constraint.growDirection && constraint.growSize) {
+            const [r1, r2] = constraint.rectCorners;
+            return this.from2AlignedCornersAndGD(r1, r2, constraint.growDirection, constraint.growSize);
         } else if (constraint.rectCorners && constraint.rectCorners.length === 2) {
             const [r1, r2] = constraint.rectCorners;
-            return this.fromTwoCorners(r1, r2);
+            return this.from2Corners(r1, r2);
         } else if (constraint.rectCorners && constraint.rectCorners.length === 1 && constraint.size && constraint.refCorner) {
             const [r1] = constraint.rectCorners;
             return this.fromCornerAndSize(r1, constraint.size, constraint.refCorner);
         } else if (constraint.rectSides && constraint.rectSides.length === 4) {
-            return this.fromFourSides(constraint.rectSides);
+            return this.from4Sides(constraint.rectSides);
         } else if (constraint.rectSides && constraint.rectSides.length === 1 && constraint.growDirection && constraint.growSize) {
             const [side] = constraint.rectSides;
-            return this.fromSideAndGrowDirection(side, constraint.growDirection, constraint.growSize);
+            return this.fromSideAndGD(side, constraint.growDirection, constraint.growSize);
         }
 
         return this.empty();

@@ -25,7 +25,7 @@ const CUIVBox = ({ rect, cellHeight, children, style, reverse = false }: Props) 
 
         let rect = Rectangle.create({
             rectSides: [rectSide],
-            growDirection: reverse ? 'up' : 'down',
+            growDirection: reverse ? 'top' : 'bottom',
             growSize: cellHeight ? cellHeight : 100
         });
         topElement = rect;
@@ -45,6 +45,4 @@ const CUIVBox = ({ rect, cellHeight, children, style, reverse = false }: Props) 
     )
 }
 
-export default CUIVBox
-
-const styles = StyleSheet.create({})
+export default CUIVBox;

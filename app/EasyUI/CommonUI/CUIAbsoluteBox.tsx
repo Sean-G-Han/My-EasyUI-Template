@@ -16,6 +16,7 @@ const CUIAbsoluteBox = ({ children, rect, padding, name, style }: Props) => {
     const mainXYWH = rect.getXYWH();
     const parent = React.useContext(RectContext);
     const mainStyle = {
+        position: 'absolute' as const,
         left: Animated.subtract(mainXYWH.x, parent.x || 0),
         top: Animated.subtract(mainXYWH.y, parent.y || 0),
         width: mainXYWH.width,
@@ -25,7 +26,7 @@ const CUIAbsoluteBox = ({ children, rect, padding, name, style }: Props) => {
     };
     return (
         <RectProvider value={{ x: mainXYWH.x, y: mainXYWH.y, parent: rect }}>
-            <Animated.View style={[ styles.container, mainStyle, style ]}>
+            <Animated.View style={[ mainStyle, style ]}>
                 {children}
             </Animated.View>
         </RectProvider>
@@ -33,11 +34,3 @@ const CUIAbsoluteBox = ({ children, rect, padding, name, style }: Props) => {
 };
 
 export default CUIAbsoluteBox;
-
-const styles = StyleSheet.create({
-    container: {
-        position: 'absolute',
-        borderWidth: 1,
-        borderColor: 'black',
-    },
-});
