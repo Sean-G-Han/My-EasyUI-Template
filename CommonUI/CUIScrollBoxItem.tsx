@@ -1,5 +1,5 @@
 import { View, ViewStyle } from 'react-native'
-import React, { useEffect, useImperativeHandle, useRef, useState } from 'react'
+import React, { useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import RectContext, { RectProvider } from '../RectContext'
 import { Rectangle, RectFactory } from '../geometry'
 import CUIRelativeBox from './CUIRelativeBox'
@@ -17,7 +17,11 @@ const CUIScrollBoxItem = ({ height, factory, style }: Props) => {
         return null
     }
     const parentWidth = parent?.parent?.getXYWH().width || 0
-    const selfRect = new Rectangle({ width: parentWidth, height }, { x: 0, y: 0 }, "top-left", "scroll-box-item")
+
+    // Note: Using useMemo to avoid recreating Rectangle on every render
+    const selfRect = useMemo(() => {
+        return new Rectangle({ width: parentWidth, height }, { x: 0, y: 0 }, "top-left", "scroll-box-item");
+    }, [parentWidth, height]);
 
     // Attaching Reference
     const [isHighlighted, setIsHighlighted] = useState(false);

@@ -1,4 +1,4 @@
-import React, { useEffect, useImperativeHandle, useRef, useState } from "react";
+import React, { useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { Rectangle, RectFactory, Size } from "../geometry";
 import RectContext, { RectProvider } from "../RectContext";
 import CUIAbsoluteBox from "./CUIAbsoluteBox";
@@ -18,8 +18,12 @@ const CUIRelativeBox = ({ factory }: Props) => {
         return null;
     }
 
-    const selfRect = new Rectangle(boxSize, { x: 0, y: 0 }, "top-left", "relative-box");
-    const childRects = factory(selfRect);
+    // Note: Using useMemo to avoid recreating Rectangle on every render
+    const selfRect = useMemo(() => {
+        return new Rectangle(boxSize, { x: 0, y: 0 }, "top-left", "relative-box");
+    }, [parentRect]);
+
+    const childRects = useMemo(() => factory(selfRect), [factory, selfRect]);
     
     // Attaching Reference
     const [isHighlighted, setIsHighlighted] = useState(false);
@@ -33,7 +37,7 @@ const CUIRelativeBox = ({ factory }: Props) => {
     useEffect(() => {
         RefRegistry.addRelation(parentRect!.className, selfRect.className, parentRect!.id, selfRect.id);
         RefRegistry.addReference(selfRect.className, selfRect.id, internalRef.current);
-    }, [selfRect]);
+    }, [parentRect]);
     // End Attaching Reference
 
     const mainStyle = {
@@ -42,7 +46,7 @@ const CUIRelativeBox = ({ factory }: Props) => {
     };
 
     return (
-        <RectProvider value={{ x: 0, y: 0, parent: selfRect }}>
+        <RectProvider value={{ x: 0, y: 0, parent: parentRect }}>
             {childRects.map((item, idx) => {
                 return (
                     <CUIAbsoluteBox key={idx} rect={item.rect} style={{ ...item.style, ...mainStyle }}>

@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Animated, StyleProp, ViewStyle } from 'react-native';
 import RectContext, { RectProvider } from '../RectContext';
 import { Rectangle } from '../geometry';
