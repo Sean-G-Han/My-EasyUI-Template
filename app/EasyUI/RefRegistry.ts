@@ -33,9 +33,9 @@ class RefRegistryNode {
         const branch = level === 0 ? "" : (isLast ? `${DIM}└── ${RESET}` : `${DIM}├── ${RESET}`);
         const classPart = `${CYAN}${this.className}${RESET}`;
         const idPart = `${YELLOW}${this.id}${RESET}`;
-        const noRef = this.ref ? ` ${GREEN}(Referenced)${RESET}` : ` ${RED}(No Reference)${RESET}`;
+        const noRef = this.ref ? `${GREEN}(Referenced)${RESET}` : `${RED}(No Reference)${RESET}`;
 
-        result += prefix + branch + `${classPart}_${idPart}${noRef}\n`;
+        result += prefix + branch + `${classPart} (id: ${idPart}) ${noRef}\n`;
 
         if (this.children && this.children.length > 0) {
             const newPrefix = prefix + (level === 0 ? "" : (isLast ? `${DIM}    ${RESET}` : `${DIM}│   ${RESET}`));
@@ -49,18 +49,14 @@ class RefRegistryNode {
 
         return result;
     }
-
-
-    toString(): string {
-        return `RefRegistryNode(className=${this.className}, id=${this.id}) => Parents: [${this.parents?.map(p => p.toString()).join(", ")}], Children: [${this.children?.map(c => c.toString()).join(", ")}]`;
-    }
 }
 
 export class RefRegistry {
     private static registry: Map<string, Array<RefRegistryNode>> = new Map();
+    private static allRefs: Set<any> = new Set();
 
     static clear() {
-        console.log("Clearing RefRegistry");
+        //console.log("Clearing RefRegistry");
         this.registry.clear();
     }
 
@@ -77,8 +73,7 @@ export class RefRegistry {
         return nodes ? nodes.length : 0;
     }
 
-    static treeString(nodeName: string, level: number = 0): string {
-        const id = nodeName.lastIndexOf("_") >= 0 ? parseInt(nodeName.substring(nodeName.lastIndexOf("_") + 1)) : 0;
+    static treeString(nodeName: string, id: number = 0, level: number = 0): string {
         const nodes = this.registry.get(nodeName);
         if (!nodes || nodes.length <= id) {
             return "";
@@ -113,9 +108,13 @@ export class RefRegistry {
     }
 
     static addReference(nodeName: string, id: number, ref: any) {
+        if (this.allRefs.has(ref)) {
+            console.warn(`Reference for ${nodeName}_${id} is already registered.`);
+        }
         const nodes = this.registry.get(nodeName);
         if (nodes && nodes.length > id) {
             RefRegistryNode.addReference(nodes[id], ref);
+            this.allRefs.add(ref);
         }
     }
 
