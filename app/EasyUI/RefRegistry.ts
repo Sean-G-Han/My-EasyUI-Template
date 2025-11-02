@@ -1,12 +1,12 @@
-import { Rectangle } from "./geometry";
-
 class RefRegistryNode {
-    rect: Rectangle;
+    className: string = ""; 
+    id: number = 0;
     ref?: any;// temp placeholder before I find out what type ref is
     parents?: RefRegistryNode[] = [];
     children?: RefRegistryNode[] = [];
-    constructor(rect: Rectangle) {
-        this.rect = rect;
+    constructor(className: string, id: number) {
+        this.className = className;
+        this.id = id;
     }
 
     static addRelation(parent: RefRegistryNode, child: RefRegistryNode) {
@@ -16,14 +16,29 @@ class RefRegistryNode {
         child.parents.push(parent);
     }
 
+    static addReference(node: RefRegistryNode, ref: any) {
+        node.ref = ref;
+    }
+
     treeString(level: number = 0, isLast: boolean = true, prefix: string = ""): string {
+        const RESET = "\x1b[0m";
+        const DIM = "\x1b[90m";
+        const CYAN = "\x1b[36m";
+        const YELLOW = "\x1b[33m";
+        const RED = "\x1b[31m";
+        const GREEN = "\x1b[32m";
+
         let result = "";
 
-        const branch = level === 0 ? "" : (isLast ? "└── " : "├── ");
-        result += prefix + branch + `${this.rect.className}_${this.rect.id}\n`;
+        const branch = level === 0 ? "" : (isLast ? `${DIM}└── ${RESET}` : `${DIM}├── ${RESET}`);
+        const classPart = `${CYAN}${this.className}${RESET}`;
+        const idPart = `${YELLOW}${this.id}${RESET}`;
+        const noRef = this.ref ? ` ${GREEN}(Referenced)${RESET}` : ` ${RED}(No Reference)${RESET}`;
+
+        result += prefix + branch + `${classPart}_${idPart}${noRef}\n`;
 
         if (this.children && this.children.length > 0) {
-            const newPrefix = prefix + (level === 0 ? "" : (isLast ? "    " : "│   "));
+            const newPrefix = prefix + (level === 0 ? "" : (isLast ? `${DIM}    ${RESET}` : `${DIM}│   ${RESET}`));
             const lastIndex = this.children.length - 1;
 
             this.children.forEach((child, i) => {
@@ -35,8 +50,9 @@ class RefRegistryNode {
         return result;
     }
 
+
     toString(): string {
-        return `RefRegistryNode(className=${this.rect.className}, id=${this.rect.id}) => Parents: [${this.parents?.map(p => p.toString()).join(", ")}], Children: [${this.children?.map(c => c.toString()).join(", ")}]`;
+        return `RefRegistryNode(className=${this.className}, id=${this.id}) => Parents: [${this.parents?.map(p => p.toString()).join(", ")}], Children: [${this.children?.map(c => c.toString()).join(", ")}]`;
     }
 }
 
@@ -44,20 +60,20 @@ export class RefRegistry {
     private static registry: Map<string, Array<RefRegistryNode>> = new Map();
 
     static clear() {
+        console.log("Clearing RefRegistry");
         this.registry.clear();
     }
 
-    static registerRect(rect: Rectangle): RefRegistryNode {
-        const node = new RefRegistryNode(rect);
-        const existingNodes = this.registry.get(rect.className) || [];
-        existingNodes.push(node);
-        this.registry.set(rect.className, existingNodes);
+    static registerRef(className: string, id: number): RefRegistryNode {
+        const node = new RefRegistryNode(className, id);
+        const existingNodes = this.registry.get(className) || [];
+        existingNodes[id] = node; // dont use push() in case id != pos (e.g. if skipped)
+        this.registry.set(className, existingNodes);
         return node;
     }
 
-    static getNumberOfClass(rect: string|Rectangle): number {
-        const rectName = rect instanceof Rectangle ? rect.className : rect;
-        const nodes = this.registry.get(rectName);
+    static getNumberOfClass(className: string): number {
+        const nodes = this.registry.get(className);
         return nodes ? nodes.length : 0;
     }
 
@@ -95,6 +111,45 @@ export class RefRegistry {
             RefRegistryNode.addRelation(parentNodes[parentId], childNodes[childId]);
         }
     }
+
+    static addReference(nodeName: string, id: number, ref: any) {
+        const nodes = this.registry.get(nodeName);
+        if (nodes && nodes.length > id) {
+            RefRegistryNode.addReference(nodes[id], ref);
+        }
+    }
+
+    static highlightAll(isOn:boolean=true) {
+        this.registry.forEach((nodes) => {
+            nodes.forEach((node) => {
+                if (node.ref && node.ref.highlight) {
+                    node.ref.highlight(isOn);
+                }
+            });
+        });
+    }
+
+    static highlight(name: string, isOn: boolean = true, optional_id?: number) {
+        if (optional_id !== undefined) {
+            const nodes = this.registry.get(name);
+            if (nodes && nodes.length > (optional_id || 0)) {
+                const node = nodes[optional_id || 0];
+                if (node.ref && node.ref.highlight) {
+                    node.ref.highlight(isOn);
+                }
+            }
+        } else {
+            const nodes = this.registry.get(name);
+            if (nodes) {
+                nodes.forEach((node) => {
+                    if (node.ref && node.ref.highlight) {
+                        node.ref.highlight(isOn);
+                    }
+                });
+            }
+        }
+    }
+
 }
 
 // Apperently this allows you to just use in console
