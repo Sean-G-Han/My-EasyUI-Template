@@ -1,7 +1,7 @@
 import React from 'react';
 import { Animated, StyleProp, ViewStyle } from 'react-native';
 import RectContext, { RectProvider } from '../RectContext';
-import { AnimMath, Rectangle } from '../geometry';
+import { Rectangle } from '../geometry';
 
 type Props = {
     children?: React.ReactNode;

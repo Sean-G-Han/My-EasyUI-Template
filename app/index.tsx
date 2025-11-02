@@ -4,10 +4,10 @@ import CUIAbsoluteBox from './EasyUI/CommonUI/CUIAbsoluteBox';
 import { Rectangle, RectFactory } from './EasyUI/geometry';
 import CUIScrollBox from './EasyUI/CommonUI/CUIScrollBox';
 import CUIScrollBoxItem from './EasyUI/CommonUI/CUIScrollBoxItem';
-import { RectRegistry } from './EasyUI/RectRegistry';
+import { RefRegistry } from './EasyUI/RefRegistry';
 
 export default function Example() {
-    RectRegistry.clear();
+    RefRegistry.clear();
     const window = useWindowDimensions();
     const root = Rectangle.create({
         size: {width: window.width, height: window.height},
@@ -84,4 +84,4 @@ export default function Example() {
     );
 }
 
-export { RectRegistry };
+export { RefRegistry };

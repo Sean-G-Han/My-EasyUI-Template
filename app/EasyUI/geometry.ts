@@ -1,5 +1,5 @@
-import { Animated, View, ViewStyle } from "react-native";
-import { RectRegistry } from "./RectRegistry";
+import { Animated, ViewStyle } from "react-native";
+import { RefRegistry } from "./RefRegistry";
 
 export type AnimNum = number | Animated.Value | Animated.AnimatedNode;
 
@@ -91,32 +91,20 @@ export type RectWithContent = {
 export type RectFactory = (parent: Rectangle) => RectWithContent[];
 
 export class Rectangle {
-    name: string;
+    className: string = "unnamed-rectangle";
+    id: number = 0;
     size: Size;
     pos: Pos;
     referencePoint: Point = "top-left";
-    constructor(size: Size, pos: Pos, referencePoint?: Point, name?: string) {
+    constructor(size: Size, pos: Pos, referencePoint?: Point, className?: string) {
         this.size = size;
         this.pos = pos;
         if (referencePoint)
             this.referencePoint = referencePoint;
-        if (name) {
-            if (!RectRegistry.hasRect(name)) {
-                this.name = name;
-            } else {
-                let randomID: string;
-                do {
-                    randomID = `_${Math.random().toString(36).slice(2, 11)}`;
-                } while (RectRegistry.hasRect(name + randomID));
-                this.name = name + randomID;
-            }
-            RectRegistry.registerRect(this);
-        } else {
-            let randomName: string;
-            do {
-                randomName = `rect_${Math.random().toString(36).slice(2, 11)}`;
-            } while (RectRegistry.hasRect(randomName));
-            this.name = randomName;
+        if (className) {
+            this.className = className;
+            this.id = RefRegistry.getNumberOfClass(className);
+            RefRegistry.registerRect(this);
         }
     }
 
@@ -350,9 +338,9 @@ export class Rectangle {
             parentRect.add(side[0]);
             rect = this.fromSideAndGD(side, constraint.growDirection, constraint.growSize, name);
         }
-
-        parentRect.forEach(element => {
-            RectRegistry.addRelation(element, rect);
+        
+        parentRect.forEach((p) => {
+            RefRegistry.addRelation(p.className, rect.className, p.id, rect.id);
         });
 
         return rect;
