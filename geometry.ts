@@ -104,7 +104,7 @@ export class Rectangle {
         if (className) {
             this.className = className;
             this.id = RefRegistry.getNumberOfClass(className);
-            RefRegistry.registerRect(this);
+            RefRegistry.registerRef(this.className, this.id);
         }
     }
 
