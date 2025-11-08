@@ -3,6 +3,7 @@ import { Rectangle, RectFactory, Size } from "../geometry";
 import RectContext, { RectProvider } from "../RectContext";
 import CUIAbsoluteBox from "./CUIAbsoluteBox";
 import { RefRegistry } from "../RefRegistry";
+import { SignalObject } from "../signal";
 
 type Props = {
     factory: RectFactory;
@@ -29,9 +30,15 @@ const CUIRelativeBox = ({ factory }: Props) => {
     const [isHighlighted, setIsHighlighted] = useState(false);
     const internalRef = useRef<any>(null);
     useImperativeHandle(internalRef, () => ({
-        highlight(isOn: boolean = true) {
-            setIsHighlighted(isOn);
-        },
+        receiveSignal(signal: SignalObject) {
+            switch (signal.key) {
+                case 'highlight':
+                    setIsHighlighted(!signal.value);
+                    break;
+                default:
+                    break;
+            }
+        }
     }));
     
     useEffect(() => {

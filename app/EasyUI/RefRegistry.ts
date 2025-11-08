@@ -1,3 +1,5 @@
+import { SignalObject } from "./signal";
+
 class RefRegistryNode {
     className: string = ""; 
     id: number = 0;
@@ -118,11 +120,11 @@ export class RefRegistry {
         }
     }
 
-    static highlightAll(isOn:boolean=true) {
+    static sendSignalToAll(signal: SignalObject) {
         this.registry.forEach((nodes) => {
             nodes.forEach((node) => {
-                if (node.ref && node.ref.highlight) {
-                    node.ref.highlight(isOn);
+                if (node.ref && node.ref.receiveSignal) {
+                    node.ref.receiveSignal(signal);
                 }
             });
         });

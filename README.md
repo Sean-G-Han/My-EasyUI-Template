@@ -1,21 +1,23 @@
 # CommonUI Template
 
-A lightweight **React Native UI template** for building layouts using **constraints**, similar to Autodesk-style layout programs. Components are positioned and sized using **`Rectangle`** objects and a **constraint-based system**, allowing flexible and precise UI placement.
+A lightweight **React Native UI template** for building layouts using **constraints**, similar to Autodesk-style layout programs. Components are positioned and sized using **`Rect`** objects and a **constraint-based system**, allowing flexible and precise UI placement.
 
----
+## Table of Contents
+- [Features](#Features)
+- [Introduction](#Introduction)
+- [Usage](#Usage)
+-- [Rect](#Rect)
+-- [CUIAbsoluteBox](#CUIAbsoluteBox)
+-- [CUIRelativeBox](#CUIRelativeBox)
 
 ## Features
 
 - **Constraint-based layout**: Attach UI elements relative to parent rectangles or other elements.  
-- **Rectangle abstraction**: Each UI element is represented as a `Rectangle`, making size, position, and growth behavior explicit.  
-- **Composable UI components**: Easily wrap and position children in `CommonUIRect` or custom layout components like `CommonUISideBar`.  
+- **Rectangle abstraction**: Each UI element is represented as a `Rectangle`, making size, position, and growth behavior explicit.
 - **React context-based**: Automatic propagation of layout context via `RectContext` for nested components.  
 
----
 
 ## Getting Started
-
-### 1. Add as a Git submodule
 
 If you want to use only the library (without the full project), you can add the `library-only` branch as a submodule in your own project:
 
@@ -23,71 +25,74 @@ If you want to use only the library (without the full project), you can add the 
 git submodule add -b library-only https://github.com/Sean-G-Han/project-a.git path/to/library
 git submodule update --init --recursive
 ```
-### 2. Import Components
-`import { CommonUIRect, CommonUISideBar } from 'EasyUI/CommonUI/[COMPONENT_NAME]';`
 
-Use them in your JSX like any other React Native component:
-```
-    const window = useWindowDimensions();
-    const root = Rectangle.create({
-        size: {width: window.width, height: window.height},
-        pos: {x: 0, y: 0},
-    });
+After that, import the components as you would any React component, e.g.
 
-    const child = Rectangle.create({
-        size: { width: 50, height: 50 },
-        rectCorners: [[root, "bottom-right"]],
-        refCorner: "bottom-right",
-    });
-
-    const child2 = Rectangle.create({
-        size: { width: 50, height: 50 },
-        rectCorners: [[root, "top-left"]],
-        refCorner: "top-left",
-    });
-
-    const child3 = Rectangle.create({
-        rectSides: [[child, "left"], [child2, "right"], [child2, "bottom"], [child, "top"]],
-    });
-
-    return (
-        <>
-        <CommonUIRect rect={root}>
-          <CommonUIRect rect={child} />
-          <CommonUIRect rect={child2} />
-          <CommonUIRect rect={child3} />
-        </CommonUIRect>
-        </>
-    );
-```
-
-### 3. Using Rectangles & Constraints
-
-Define a rectangle:
-```
-const myRect = Rectangle.create({
-  rectSides: [[parentRect, "top"]],
-  growDirection: "down",
-  growSize: 200
-});
-```
-
-
-Wrap your content in CommonUIRect:
-```
-<CommonUIRect rect={myRect}>
-  <Text>Hello, World!</Text>
-</CommonUIRect>
-```
-
-### 4. Updating the Library Submodule
+`import CUIAbsoluteBox from './EasyUI/CommonUI/CUIAbsoluteBox';;`
 
 If the library code in library-only is updated, pull the latest changes in your project:
 
 `git submodule update --remote --merge`
 
-### 5. Why library-only Branch Exists
+## Rect
 
-Git submodules always clone entire repositories, not individual folders.
+Rects (short for rectangles) are the main buildng blocks of the EasyUI system.
 
-You could technically use the full repo as a submodule, but library-only keeps it clean and package-like.
+They are defined using the `create` factory method which takes in a set of constraints. The Rect generated can then be injected into "Box" Components to display thee items. For example, 
+
+```
+// Custom function. Imo, make things neater
+function useLayoutRects(window: { width: number; height: number }) {
+    return React.useMemo(() => {
+        RefRegistry.clear();
+        const root = Rectangle.create({
+            size: { width: window.width, height: window.height },
+            pos: { x: 0, y: 0 },
+        }, "root");
+
+        return { root };
+    }, [window.width, window.height]);
+}
+
+function Example() {
+    const window = useWindowDimensions();
+    const { root } = useLayoutRects(window);
+
+    return (
+        <CUIAbsoluteBox rect={root}>
+
+        </CUIAbsoluteBox>
+    );
+}
+
+export default React.memo(Example);
+export { RefRegistry };
+```
+
+The above example is a bit of an overkill way to create a `View` that fits the entire screen. As you can see, we are using the size+pos constraints to define the rectangle. That said, the main advantage of EasyUI is the ability to use existing rects as reference. For Example,
+
+```
+const root = Rectangle.create({
+    size: { width: window.width, height: window.height },
+    pos: { x: 0, y: 0 },
+}, "root");
+
+const tl = Rectangle.create({
+    size: { width: 100, height: 100 },
+    refCorner: "top-left",
+    rectCorners: [[root, "top-left"]],
+}, "tl-box");
+
+//...
+
+<CUIAbsoluteBox rect={root}>
+    <CUIAbsoluteBox rect={tl} style={{ backgroundColor: 'lightgreen' }} />
+</CUIAbsoluteBox>
+```
+
+In this example, I am adding a coloured rectangle to the top-left of the root. This is done by attaching top-left corner of a 100x100 Rect to the top-left corner of the root. Keep in mind, in this example, child box is inside the parent box to better illustrate the relationship. Feel free to unnest them, it doesn't reallly matter.
+
+```
+<CUIAbsoluteBox rect={root}/>
+<CUIAbsoluteBox rect={tl} style={{ backgroundColor: 'lightgreen' }} />
+```

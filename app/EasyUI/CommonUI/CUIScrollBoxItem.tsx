@@ -4,6 +4,7 @@ import RectContext, { RectProvider } from '../RectContext'
 import { Rectangle, RectFactory } from '../geometry'
 import CUIRelativeBox from './CUIRelativeBox'
 import { RefRegistry } from '../RefRegistry'
+import { SignalObject } from '../signal'
 
 type Props = {
     height: number
@@ -26,10 +27,17 @@ const CUIScrollBoxItem = ({ height, factory, style }: Props) => {
     // Attaching Reference
     const [isHighlighted, setIsHighlighted] = useState(false);
     const internalRef = useRef<any>(null);
+
     useImperativeHandle(internalRef, () => ({
-        highlight(isOn: boolean = true) {
-            setIsHighlighted(isOn); // TODO: Fix a bug where re-renders causes a whole new rectangle to be formed and reference ADDED
-        },
+        receiveSignal(signal: SignalObject) {
+            switch (signal.key) {
+                case 'highlight':
+                    setIsHighlighted(!signal.value);
+                    break;
+                default:
+                    break;
+            }
+        }
     }));
         
     useEffect(() => {
