@@ -110,4 +110,46 @@ AbsoluteBoxes is the main way to structure the code. It takes in a Rect object a
 
 ## RelativeBox
 
-RelativeBoxes are a way to add repeated and/or dynamic components inside an AbsoluteBox.
+RelativeBoxes are used to add repeated or dynamically generated components inside an existing AbsoluteBox.
+They accept a function of type RectFactory, which defines how new child rectangles (and their content) should be created relative to the parent rectangle.
+
+```
+export type RectWithContent = {
+    rect: Rectangle;
+    element?: React.ReactNode;
+    style?: ViewStyle;
+};
+
+export type RectFactory = (parent: Rectangle) => RectWithContent[];
+```
+
+This function receives the parent Rectangle and returns a list of RectWithContent objects—each describing a child’s geometry, style, and optional React element.
+This allows layouts to be programmatically generated based on the parent’s dimensions or position, enabling flexible and reusable UI structures.
+
+Note: You  need to place the RelativeBox inside another RelativeBox or an AbsoluteBox for it to have any affect.
+
+```
+const flagFactory: RectFactory = (selfRect) => {
+    const tl = Rectangle.create({
+        size: { width: 20, height: 20 },
+        refCorner: 'top-left',
+        rectCorners: [[selfRect, "top-left"]],
+    }, "flag1-tl");
+
+    const br = Rectangle.create({
+        size: { width: 20, height: 20 },
+        refCorner: 'bottom-right',
+        rectCorners: [[selfRect, "bottom-right"]],
+    }, "flag1-br");
+
+    const center = Rectangle.create({
+        rectCorners: [[tl, "bottom-right"], [br, "top-left"]],
+    }, "flag1-center");
+
+    return [{ rect: tl, style: { backgroundColor: 'lightblue' } }, { rect: br, style: { backgroundColor: 'lightcoral' } }, { rect: center, style: { backgroundColor: 'lightgreen' } }];
+}
+
+<CUIAbsoluteBox rect={root}>
+    <CUIRelativeBox factory={flagFactory} />
+</CUIAbsoluteBox>
+```
