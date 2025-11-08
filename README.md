@@ -9,6 +9,8 @@ A lightweight **React Native UI template** for building layouts using **constrai
     - [Rect System](#Rect)
     - [CUIAbsoluteBox](#CUIAbsoluteBox)
     - [CUIRelativeBox](#CUIRelativeBox)
+    - [RefRegistry](#RefRegistry)
+    - [Signals](#Signals)
 
 ## Features
 
@@ -36,7 +38,7 @@ If the library code in library-only is updated, pull the latest changes in your 
 
 # Usage
 ## Rect System
-
+### Introduction to Rect
 Rects (short for rectangles) are the main buildng blocks of the EasyUI system.
 
 They are defined using the `create` factory method which takes in a set of constraints. The Rect generated can then be injected into "Box" Components to display thee items. For example, 
@@ -97,6 +99,36 @@ In this example, I am adding a coloured rectangle to the top-left of the root. T
 <CUIAbsoluteBox rect={root}/>
 <CUIAbsoluteBox rect={tl} style={{ backgroundColor: 'lightgreen' }} />
 ```
+### How to Use `Rect.create` (i.e. constraints)
+The `Rect.create` factory function takes in a type `Constraint` object as well as a name (which is used in `RefRegistry`)
+```
+export type AnimNum = number | Animated.Value | Animated.AnimatedNode;
+
+export type Point = "top-left" | "top-right" | "center" | "bottom-left" | "bottom-right";
+
+export type Side = "top" | "right" | "bottom" | "left";
+
+export type Size = {
+    width: AnimNum;
+    height: AnimNum;
+};
+
+export type Pos = {
+    x: AnimNum;
+    y: AnimNum;
+};
+
+export type Constraint = {
+    pos?: Pos;
+    size?: Size;
+    refCorner?: Point;
+    rectCorners?: Array<[Rectangle, Point]>;
+    rectSides?: Array<[Rectangle, Side]>;
+    growDirection?: Side;
+    growSize?: AnimNum;
+}
+```
+This design probably seems a bit strange, but it is based of engineering software like AutoCad where users can specify any constraints they want. When the software has enough information to confirm the size and position of an object, it assigns it to the object.
 
 ## AbsoluteBox
 
@@ -153,3 +185,7 @@ const flagFactory: RectFactory = (selfRect) => {
     <CUIRelativeBox factory={flagFactory} />
 </CUIAbsoluteBox>
 ```
+
+## RefRegistry
+
+RefRegistry is a data structure that keeps track of all the `Rect` created and their associated box components
