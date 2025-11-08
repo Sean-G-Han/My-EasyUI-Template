@@ -3,6 +3,7 @@ import { Animated, StyleProp, ViewStyle } from 'react-native';
 import RectContext, { RectProvider } from '../RectContext';
 import { Rectangle } from '../geometry';
 import { RefRegistry } from '../RefRegistry';
+import { SignalObject } from '../signal';
 
 type Props = {
     children?: React.ReactNode;
@@ -17,9 +18,15 @@ const CUIAbsoluteBox = ({ children, rect, padding, style }: Props) => {
     const internalRef = useRef<any>(null);
 
     useImperativeHandle(internalRef, () => ({
-        highlight(isOn: boolean = true) {
-            setIsHighlighted(isOn);
-        },
+        receiveSignal(signal: SignalObject) {
+            switch (signal.key) {
+                case 'highlight':
+                    setIsHighlighted(!signal.value);
+                    break;
+                default:
+                    break;
+            }
+        }
     }));
 
     useEffect(() => {

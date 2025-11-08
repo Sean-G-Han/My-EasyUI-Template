@@ -3,6 +3,7 @@ import React, { use, useEffect, useImperativeHandle, useRef, useState } from "re
 import RectContext from "../RectContext";
 import { Rectangle } from "../geometry";
 import { RefRegistry } from "../RefRegistry";
+import { SignalObject } from "../signal";
 
 type Props = {
   rect: Rectangle;
@@ -11,19 +12,25 @@ type Props = {
 };
 
 const CUIScrollBox = ({ rect, children, style }: Props) => {
-    // Attaching Reference
     const [isHighlighted, setIsHighlighted] = useState(false);
     const internalRef = useRef<any>(null);
+
     useImperativeHandle(internalRef, () => ({
-        highlight(isOn: boolean = true) {
-            setIsHighlighted(isOn);
-        },
+        receiveSignal(signal: SignalObject) {
+            switch (signal.key) {
+                case 'highlight':
+                    setIsHighlighted(!signal.value);
+                    break;
+                default:
+                    break;
+            }
+        }
     }));
         
     useEffect(() => {
         RefRegistry.addReference(rect.className, rect.id, internalRef.current);
     }, [rect]);
-    // End Attaching Reference
+
     const mainXYWH = rect.getXYWH();
     const parent = React.useContext(RectContext);
     const mainStyle = {
@@ -35,6 +42,7 @@ const CUIScrollBox = ({ rect, children, style }: Props) => {
         borderWidth: isHighlighted ? 2 : 0,
         borderColor: isHighlighted ? 'green' : 'transparent',
     };
+
     return (
         <Animated.ScrollView style={[ mainStyle, style ]}
             showsVerticalScrollIndicator={false}
