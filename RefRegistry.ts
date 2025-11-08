@@ -129,28 +129,6 @@ export class RefRegistry {
             });
         });
     }
-
-    static highlight(name: string, isOn: boolean = true, optional_id?: number) {
-        if (optional_id !== undefined) {
-            const nodes = this.registry.get(name);
-            if (nodes && nodes.length > (optional_id || 0)) {
-                const node = nodes[optional_id || 0];
-                if (node.ref && node.ref.highlight) {
-                    node.ref.highlight(isOn);
-                }
-            }
-        } else {
-            const nodes = this.registry.get(name);
-            if (nodes) {
-                nodes.forEach((node) => {
-                    if (node.ref && node.ref.highlight) {
-                        node.ref.highlight(isOn);
-                    }
-                });
-            }
-        }
-    }
-
 }
 
 // Apperently this allows you to just use in console
