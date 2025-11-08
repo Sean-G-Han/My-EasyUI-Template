@@ -6,9 +6,9 @@ A lightweight **React Native UI template** for building layouts using **constrai
 - [Features](#Features)
 - [Introduction](#Introduction)
 - [Usage](#Usage)
--- [Rect](#Rect)
--- [CUIAbsoluteBox](#CUIAbsoluteBox)
--- [CUIRelativeBox](#CUIRelativeBox)
+    - [Rect System](#Rect)
+    - [CUIAbsoluteBox](#CUIAbsoluteBox)
+    - [CUIRelativeBox](#CUIRelativeBox)
 
 ## Features
 
@@ -34,7 +34,8 @@ If the library code in library-only is updated, pull the latest changes in your 
 
 `git submodule update --remote --merge`
 
-## Rect
+# Usage
+## Rect System
 
 Rects (short for rectangles) are the main buildng blocks of the EasyUI system.
 
@@ -69,7 +70,7 @@ export default React.memo(Example);
 export { RefRegistry };
 ```
 
-The above example is a bit of an overkill way to create a `View` that fits the entire screen. As you can see, we are using the size+pos constraints to define the rectangle. That said, the main advantage of EasyUI is the ability to use existing rects as reference. For Example,
+The above example is a bit of an overkill way to create a ``View`` that fits the entire screen. As you can see, we are using the size+pos constraints to define the rectangle. That said, the main advantage of EasyUI is the ability to use existing rects as reference. For Example,
 
 ```
 const root = Rectangle.create({
@@ -90,9 +91,23 @@ const tl = Rectangle.create({
 </CUIAbsoluteBox>
 ```
 
-In this example, I am adding a coloured rectangle to the top-left of the root. This is done by attaching top-left corner of a 100x100 Rect to the top-left corner of the root. Keep in mind, in this example, child box is inside the parent box to better illustrate the relationship. Feel free to unnest them, it doesn't reallly matter.
+In this example, I am adding a coloured rectangle to the top-left of the root. This is done by attaching the top-left corner of a 100x100 Rect to the top-left corner of the root. Keep in mind, in this example, the child box is inside the parent box to better illustrate the relationship. Feel free to unnest them; it doesn't really matter.
 
 ```
 <CUIAbsoluteBox rect={root}/>
 <CUIAbsoluteBox rect={tl} style={{ backgroundColor: 'lightgreen' }} />
 ```
+
+## AbsoluteBox
+
+AbsoluteBoxes is the main way to structure the code. It takes in a Rect object as a parameter and renders it as an `Animated.View` component. As such, you can add other child components as you would a regular `View` component.
+
+```
+<CUIAbsoluteBox rect={root}>
+    <Button/>
+</CUIAbsoluteBox>
+```
+
+## RelativeBox
+
+RelativeBoxes are a way to add repeated and/or dynamic components inside an AbsoluteBox.
