@@ -1,10 +1,9 @@
 import React from 'react';
 import { useWindowDimensions } from 'react-native';
 import CUIAbsoluteBox from './EasyUI/CommonUI/CUIAbsoluteBox';
-import CUIScrollBox from './EasyUI/CommonUI/CUIScrollBox';
-import CUIScrollBoxItem from './EasyUI/CommonUI/CUIScrollBoxItem';
-import { Rectangle, RectFactory } from './EasyUI/geometry';
+import { Rectangle } from './EasyUI/geometry';
 import { RefRegistry } from './EasyUI/RefRegistry';
+import DUIExample from './DUIExample';
 
 // Static Commponent Example
 function useLayoutRects(window: { width: number; height: number }) {
@@ -53,31 +52,6 @@ function useLayoutRects(window: { width: number; height: number }) {
     }, [window.width, window.height]);
 }
 
-// Dynamic Component Example
-const flag1: RectFactory = (selfRect) => {
-    const tl = Rectangle.create({
-        size: { width: 20, height: 20 },
-        refCorner: 'top-left',
-        rectCorners: [[selfRect, "top-left"]],
-    }, "flag1-tl");
-
-    const br = Rectangle.create({
-        size: { width: 20, height: 20 },
-        refCorner: 'bottom-right',
-        rectCorners: [[selfRect, "bottom-right"]],
-    }, "flag1-br");
-
-    const center = Rectangle.create({
-        rectCorners: [[tl, "bottom-right"], [br, "top-left"]],
-    }, "flag1-center");
-
-    return [
-        { rect: tl, style: { backgroundColor: 'lightblue' } },
-        { rect: br, style: { backgroundColor: 'lightcoral' } },
-        { rect: center, style: { backgroundColor: 'lightgreen' } }
-    ];
-};
-
 function Example() {
     const window = useWindowDimensions();
     const { root, tl, tr, br, bl, header, body } = useLayoutRects(window);
@@ -89,13 +63,7 @@ function Example() {
             <CUIAbsoluteBox rect={tr} style={{ backgroundColor: 'lightcoral' }} />
             <CUIAbsoluteBox rect={br} style={{ backgroundColor: 'lightgoldenrodyellow' }} />
             <CUIAbsoluteBox rect={bl} style={{ backgroundColor: 'lightpink' }} />
-
-            <CUIScrollBox rect={body} style={{ backgroundColor: 'lightgray' }}>
-                <CUIScrollBoxItem height={150} factory={flag1} />
-                <CUIScrollBoxItem height={150} factory={flag1} />
-                <CUIScrollBoxItem height={150} factory={flag1} />
-                <CUIScrollBoxItem height={150} factory={flag1} />
-            </CUIScrollBox>
+            <DUIExample rect={body} />
         </CUIAbsoluteBox>
     );
 }
