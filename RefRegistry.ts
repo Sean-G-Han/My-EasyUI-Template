@@ -18,8 +18,25 @@ class RefRegistryNode {
         child.parents.push(parent);
     }
 
+    static removeRelation(parent: RefRegistryNode, child: RefRegistryNode) {
+        if (parent.children) {
+            parent.children = parent.children.filter((c) => c !== child);
+        }
+        if (child.parents) {
+            child.parents = child.parents.filter((p) => p !== parent);
+        }
+    }
+
     static addReference(node: RefRegistryNode, ref: any) {
         node.ref = ref;
+    }
+
+    static removeReference(node: RefRegistryNode) {
+        node.ref = undefined;
+    }
+
+    static hasReference(node: RefRegistryNode): boolean {   
+        return node.ref !== undefined;
     }
 
     treeString(level: number = 0, isLast: boolean = true, prefix: string = ""): string {
@@ -60,14 +77,24 @@ export class RefRegistry {
     static clear() {
         //console.log("Clearing RefRegistry");
         this.registry.clear();
+        this.allRefs.clear();
     }
 
+    // dear future self, please dont confuse registerRef with addReference or Ref with Reference
+    // registerRef creates a new RefRegistryNode and adds it to the registry
     static registerRef(className: string, id: number): RefRegistryNode {
         const node = new RefRegistryNode(className, id);
         const existingNodes = this.registry.get(className) || [];
         existingNodes[id] = node; // dont use push() in case id != pos (e.g. if skipped)
         this.registry.set(className, existingNodes);
         return node;
+    }
+
+    static deleteRef(className: string, id: number) {
+        const nodes = this.registry.get(className);
+        if (nodes && nodes.length > id) {
+            nodes.splice(id, 1);
+        }
     }
 
     static getNumberOfClass(className: string): number {
@@ -109,14 +136,51 @@ export class RefRegistry {
         }
     }
 
+    static removeRelation(parentName: string, childName: string, parentId: number = 0, childId: number = 0) {
+        const parentNodes = this.registry.get(parentName);
+        const childNodes = this.registry.get(childName);
+        if (parentNodes && childNodes && parentNodes.length > parentId && childNodes.length > childId) {
+            RefRegistryNode.removeRelation(parentNodes[parentId], childNodes[childId]);
+        }
+    }
+
     static addReference(nodeName: string, id: number, ref: any) {
         if (this.allRefs.has(ref)) {
-            console.warn(`Reference for ${nodeName}_${id} is already registered.`);
+            console.log(`Reference for ${nodeName}_${id} already exists.`);
+            return;
         }
+        
+        const nodes = this.registry.get(nodeName);
+
+        if (!nodes || nodes.length <= id) {
+            console.log(`No nodes found for ${nodeName} with id ${id}`);
+            return;
+        }
+
+        if (RefRegistryNode.hasReference(nodes[id])) {
+            console.log(`Node ${nodeName}_${id} already has a reference.`);
+            return;
+        }
+
+        RefRegistryNode.addReference(nodes[id], ref);
+        this.allRefs.add(ref);
+
+    }
+
+    static removeReference(nodeName: string, id: number) {
         const nodes = this.registry.get(nodeName);
         if (nodes && nodes.length > id) {
-            RefRegistryNode.addReference(nodes[id], ref);
-            this.allRefs.add(ref);
+            RefRegistryNode.removeReference(nodes[id]);
+            this.allRefs.delete(nodes[id].ref);
+        }
+    }
+
+    static updateReference(nodeName: string, id: number, newRef: any) {
+        const nodes = this.registry.get(nodeName);
+        if (nodes && nodes.length > id) {
+            RefRegistryNode.removeReference(nodes[id]);
+            RefRegistryNode.addReference(nodes[id], newRef);
+            this.allRefs.add(newRef);
         }
     }
 
@@ -128,6 +192,57 @@ export class RefRegistry {
                 }
             });
         });
+    }
+    
+    static sendSignalTo(signal: SignalObject, className: string, id?: number) {
+        const nodes = this.registry.get(className);
+        if (!nodes) {
+            return;
+        }
+        if (id !== undefined) {
+            if (nodes.length > id) {
+                const node = nodes[id];
+                if (node.ref && node.ref.receiveSignal) {
+                    node.ref.receiveSignal(signal);
+                }
+            }
+        } else {
+            nodes.forEach((node) => {
+                if (node.ref && node.ref.receiveSignal) {
+                    node.ref.receiveSignal(signal);
+                }
+            });
+        }
+    }
+
+    static sendSignalToAllChildren(signal: SignalObject, nodeName: string, id: number = 0) {
+        const children = this.getAllChildren(nodeName, id);
+        children.forEach((child) => {
+            if (child.ref && child.ref.receiveSignal) {
+                child.ref.receiveSignal(signal);
+            }
+        });
+    }
+
+    private static getAllChildren(nodeName: string, id: number): RefRegistryNode[] {
+        const  helper =  (node: RefRegistryNode, collected: Set<RefRegistryNode>) => {
+            if (collected.has(node)) {
+                return;
+            }
+            collected.add(node);
+            if (node.children) {
+                node.children.forEach((child) => {
+                    helper(child, collected);
+                });
+            }
+        }
+        const nodes = this.registry.get(nodeName);
+        if (!nodes || nodes.length <= id) {
+            return [];
+        }
+        const collected = new Set<RefRegistryNode>();
+        helper(nodes[id], collected);
+        return Array.from(collected);
     }
 }
 
