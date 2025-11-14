@@ -1,5 +1,5 @@
 import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { StyleProp, View, ViewStyle } from 'react-native';
+import { ScrollView, StyleProp, ViewStyle } from 'react-native';
 import RectContext, { RectProvider } from '../RectContext';
 import { Rectangle } from '../geometry';
 import { RefRegistry } from '../RefRegistry';
@@ -10,10 +10,12 @@ type Props = {
     padding?: number;
     rect: Rectangle;
     style?: StyleProp<ViewStyle>;
+    horizontal?: boolean;
+    showsScrollIndicators?: boolean;
 };
 
-const CUIAbsoluteBox = ({ children, rect, padding, style }: Props) => {
-    // Attaching Reference
+const CUIScrollBox = ({ children, rect, padding, style, horizontal, showsScrollIndicators}: Props) => {
+
     const [isHighlighted, setIsHighlighted] = useState(false);
     const internalRef = useRef<any>(null);
 
@@ -29,35 +31,32 @@ const CUIAbsoluteBox = ({ children, rect, padding, style }: Props) => {
         }
     }));
 
+    // Register reference
     useEffect(() => {
         RefRegistry.addReference(rect.className, rect.id, internalRef.current);
-
-        return () => {
-            RefRegistry.removeReference(rect.className, rect.id);
-        }   
+        return () => RefRegistry.removeReference(rect.className, rect.id);
     }, [rect]);
-    // End Attaching Reference
 
     const mainXYWH = rect.getXYWH();
     const parent = React.useContext(RectContext);
+
     let translateStyle = {};
     let sizeStyle = {};
-    if ( mainXYWH.x !== 0 && mainXYWH.y !== 0) {
-        let left = mainXYWH.x - parent.x;
-        let top = mainXYWH.y - parent.y;
+
+    if (mainXYWH.x !== 0 && mainXYWH.y !== 0) {
         translateStyle = {
-            left: left,
-            top: top,
+            left: mainXYWH.x - parent.x,
+            top: mainXYWH.y - parent.y,
         };
     }
+
     if (mainXYWH.width !== 0 && mainXYWH.height !== 0) {
-        let width = mainXYWH.width;
-        let height = mainXYWH.height;
         sizeStyle = {
-            width: width,
-            height: height,
+            width: mainXYWH.width,
+            height: mainXYWH.height,
         };
     }
+
     const mainStyle = {
         position: mainXYWH.x && mainXYWH.y ? 'absolute' as const : undefined,
         padding: padding || 0,
@@ -66,15 +65,20 @@ const CUIAbsoluteBox = ({ children, rect, padding, style }: Props) => {
         borderColor: isHighlighted ? 'blue' : 'transparent',
     };
 
-
-
     return (
         <RectProvider value={{ x: mainXYWH.x, y: mainXYWH.y, parent: rect }}>
-            <View style={[ mainStyle, translateStyle, sizeStyle, style ]}>
+            <ScrollView
+                ref={internalRef}
+                horizontal={horizontal}
+                showsHorizontalScrollIndicator={showsScrollIndicators}
+                showsVerticalScrollIndicator={showsScrollIndicators}
+                contentContainerStyle={{ padding: padding || 0, gap: padding || 0 }}
+                style={[mainStyle, translateStyle, sizeStyle, style]}
+            >
                 {children}
-            </View>
+            </ScrollView>
         </RectProvider>
     );
 };
 
-export default CUIAbsoluteBox;
+export default CUIScrollBox;

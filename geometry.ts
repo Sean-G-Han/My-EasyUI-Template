@@ -1,4 +1,4 @@
-import { Animated, ViewStyle } from "react-native";
+import { ViewStyle } from "react-native";
 import { RefRegistry } from "./RefRegistry";
 
 export type Point = "top-left" | "top-right" | "center" | "bottom-left" | "bottom-right";
@@ -48,15 +48,16 @@ export class Rectangle {
             this.referencePoint = referencePoint;
         if (className) {
             this.className = className;
-            RefRegistry.registerRef(this.className, this.id);
         }
         if (id) {
             this.id = id;
         }
+        RefRegistry.registerRef(this.className, this.id);
     }
 
-    getSide(side: Side): number {
+    getSide(side: Side): number | undefined {
         const rect = this.getXYWH();
+        if (!rect) return undefined;
         switch(side) {
             case "top":
                 return rect.y;
@@ -125,6 +126,10 @@ export class Rectangle {
         const corner1 = r1[0].getCorner(r1[1]);
         const corner2 = r2[0].getCorner(r2[1]);
 
+        if (!corner1 || !corner2) {
+            return this.empty();
+        }
+
         return new Rectangle(
             { 
                 width: Math.abs(corner2.x - corner1.x),
@@ -145,13 +150,20 @@ export class Rectangle {
     private static from4Sides(sides: [Rectangle, Side][], name?: string, id?: number): Rectangle {
         let constraintX: number[] = [];
         let constraintY: number[] = [];
+        
         for (const side of sides) {
             const rect = side[0];
             const sideName = side[1];
             if (sideName === "left" || sideName === "right") {
-                constraintX.push(rect.getSide(sideName));
+                const sideValue = rect.getSide(sideName);
+                if (sideValue === undefined)
+                    continue;
+                constraintX.push(sideValue);
             } else {
-                constraintY.push(rect.getSide(sideName));
+                const sideValue = rect.getSide(sideName);
+                if (sideValue === undefined)
+                    continue;
+                constraintY.push(sideValue);
             }
         }
 
@@ -168,6 +180,10 @@ export class Rectangle {
     private static from2AlignedCornersAndGD(corner1: [Rectangle, Point], corner2: [Rectangle, Point], growDirection: Side, growSize: number, name?: string, id?: number): Rectangle {
         const pos1 = corner1[0].getCorner(corner1[1]);
         const pos2 = corner2[0].getCorner(corner2[1]);
+
+        if (!pos1 || !pos2) {
+            return this.empty();
+        }
 
         if (pos1.x != pos2.x && pos1.y != pos2.y) {
             return this.from2Corners(corner1, corner2);
@@ -232,6 +248,10 @@ export class Rectangle {
             }
         }
 
+        if (!sidePos || !sideXYWH) {
+            return this.empty();
+        }
+
         if (growDirection === "left" || growDirection === "right") {
             size = { width: growSize, height: sideXYWH.height };
             pos = { x: sidePos, y: sideXYWH.y };
@@ -246,12 +266,16 @@ export class Rectangle {
         return this.empty();
     }
 
+    private static fromSize(size: Size, name?: string, id?: number): Rectangle {
+        return new Rectangle(size, {x: 0, y: 0}, "top-left", name, id);
+    }
+
     private static empty(): Rectangle {
         // TODO: Throw error instead?
         return new Rectangle({ width: 0, height: 0 }, { x: 0, y: 0 });
     }
 
-    static create(constraint: Constraint, name?: string, id?: number): Rectangle {
+    static create(constraint: Constraint, name?: string, id?: number, parents?: Rectangle[]): Rectangle {
         constraint = constraint || {};
 
         let rect: Rectangle = this.empty();
@@ -285,17 +309,27 @@ export class Rectangle {
             const [side] = constraint.rectSides;
             parentRect.add(side[0]);
             rect = this.fromSideAndGD(side, constraint.growDirection, constraint.growSize, name, id);
+        } else if (constraint.size) {
+            rect = this.fromSize(constraint.size, name, id);
         }
         
-        parentRect.forEach((p) => {
-            RefRegistry.addRelation(p.className, rect.className, p.id, rect.id);
-        });
+
+        if (parents) {
+            parents.forEach((p) => {
+                RefRegistry.addRelation(p.className, rect.className, p.id, rect.id);
+            });
+        } else {
+            parentRect.forEach((p) => {
+                RefRegistry.addRelation(p.className, rect.className, p.id, rect.id);
+            });
+        }
 
         return rect;
     }
 
     public toString(): string {
-        const xywh = this.getXYWH();    
+        const xywh = this.getXYWH();
+        if (!xywh) return `Rectangle(undefined)`;
         return `Rectangle(x: ${xywh.x}, y: ${xywh.y}, width: ${xywh.width}, height: ${xywh.height})`;
     }
 }
