@@ -8,7 +8,6 @@ import DUIExample from './DUIExample';
 // Static Commponent Example
 function useLayoutRects(window: { width: number; height: number }) {
     return React.useMemo(() => {
-        RefRegistry.clear();
         const root = Rectangle.create({
             size: { width: window.width, height: window.height },
             pos: { x: 0, y: 0 },
@@ -59,10 +58,10 @@ function Example() {
     return (
         <CUIAbsoluteBox rect={root}>
             <CUIAbsoluteBox rect={header} style={{ backgroundColor: 'lightblue' }} />
-            <CUIAbsoluteBox rect={tl} style={{ backgroundColor: 'lightgreen' }} />
+            {/* <CUIAbsoluteBox rect={tl} style={{ backgroundColor: 'lightgreen' }} />
             <CUIAbsoluteBox rect={tr} style={{ backgroundColor: 'lightcoral' }} />
             <CUIAbsoluteBox rect={br} style={{ backgroundColor: 'lightgoldenrodyellow' }} />
-            <CUIAbsoluteBox rect={bl} style={{ backgroundColor: 'lightpink' }} />
+            <CUIAbsoluteBox rect={bl} style={{ backgroundColor: 'lightpink' }} /> */}
             <DUIExample rect={body} />
         </CUIAbsoluteBox>
     );
