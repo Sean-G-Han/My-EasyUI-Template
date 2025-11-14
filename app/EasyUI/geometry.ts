@@ -46,13 +46,13 @@ export class Rectangle {
         this.pos = pos;
         if (referencePoint)
             this.referencePoint = referencePoint;
-        if (className) {
-            this.className = className;
-        }
         if (id) {
             this.id = id;
         }
-        RefRegistry.registerRef(this.className, this.id);
+        if (className) {
+            this.className = className;
+            RefRegistry.registerRef(this.className, this.id);
+        }
     }
 
     getSide(side: Side): number | undefined {
