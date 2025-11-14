@@ -31,6 +31,10 @@ const CUIAbsoluteBox = ({ children, rect, padding, style }: Props) => {
 
     useEffect(() => {
         RefRegistry.addReference(rect.className, rect.id, internalRef.current);
+
+        return () => {
+            RefRegistry.removeReference(rect.className, rect.id);
+        }   
     }, [rect]);
     // End Attaching Reference
 
