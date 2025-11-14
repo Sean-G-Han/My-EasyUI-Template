@@ -43,23 +43,29 @@ function useLayoutRects(window: { width: number; height: number }) {
             growSize: 100,
         }, "header-box");
 
+        const tl_header = Rectangle.create({
+            rectCorners: [[header, "top-left"]],
+            refCorner: "top-left",
+            size: { width: 50, height: 50 },
+        }, "tl-header-box");
+
         const body = Rectangle.create({
             rectCorners: [[bl, "top-right"], [header, "bottom-right"]],
         }, "body-box");
 
-        return { root, tl, tr, br, bl, header, body };
+        return { root, tl, tr, br, bl, tl_header, header, body };
     }, [window.width, window.height]);
 }
 
 function Example() {
     const window = useWindowDimensions();
-    const { root, tl, tr, br, bl, header, body } = useLayoutRects(window);
+    const { root, tl, tr, br, bl, tl_header, header, body } = useLayoutRects(window);
 
     return (
         <CUIAbsoluteBox rect={root}>
             <CUIAbsoluteBox rect={header} style={{ backgroundColor: 'lightblue' }} />
-            {/* <CUIAbsoluteBox rect={tl} style={{ backgroundColor: 'lightgreen' }} />
-            <CUIAbsoluteBox rect={tr} style={{ backgroundColor: 'lightcoral' }} />
+            <CUIAbsoluteBox rect={tl_header} style={{ backgroundColor: 'lightgreen' }} />
+            {/* <CUIAbsoluteBox rect={tr} style={{ backgroundColor: 'lightcoral' }} />
             <CUIAbsoluteBox rect={br} style={{ backgroundColor: 'lightgoldenrodyellow' }} />
             <CUIAbsoluteBox rect={bl} style={{ backgroundColor: 'lightpink' }} /> */}
             <DUIExample rect={body} />

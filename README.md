@@ -102,20 +102,18 @@ In this example, I am adding a coloured rectangle to the top-left of the root. T
 ### How to Use `Rect.create` (i.e. constraints)
 The `Rect.create` factory function takes in a type `Constraint` object as well as a name (which is used in `RefRegistry`)
 ```
-export type AnimNum = number | Animated.Value | Animated.AnimatedNode;
-
 export type Point = "top-left" | "top-right" | "center" | "bottom-left" | "bottom-right";
 
 export type Side = "top" | "right" | "bottom" | "left";
 
 export type Size = {
-    width: AnimNum;
-    height: AnimNum;
+    width: number;
+    height: number;
 };
 
 export type Pos = {
-    x: AnimNum;
-    y: AnimNum;
+    x: number;
+    y: number;
 };
 
 export type Constraint = {
@@ -125,14 +123,14 @@ export type Constraint = {
     rectCorners?: Array<[Rectangle, Point]>;
     rectSides?: Array<[Rectangle, Side]>;
     growDirection?: Side;
-    growSize?: AnimNum;
+    growSize?: number;
 }
 ```
 This design probably seems a bit strange, but it is based of engineering software like AutoCad where users can specify any constraints they want. When the software has enough information to confirm the size and position of an object, it assigns it to the object.
 
 ## AbsoluteBox
 
-AbsoluteBoxes is the main way to structure the code. It takes in a Rect object as a parameter and renders it as an `Animated.View` component. As such, you can add other child components as you would a regular `View` component.
+AbsoluteBoxes is the main way to structure the code. It takes in a Rect object as a parameter and renders it as an `View` component. As such, you can add other child components as you would a regular `View` component.
 
 ```
 <CUIAbsoluteBox rect={root}>
@@ -140,52 +138,120 @@ AbsoluteBoxes is the main way to structure the code. It takes in a Rect object a
 </CUIAbsoluteBox>
 ```
 
-## RelativeBox
-
-RelativeBoxes are used to add repeated or dynamically generated components inside an existing AbsoluteBox.
-They accept a function of type RectFactory, which defines how new child rectangles (and their content) should be created relative to the parent rectangle.
+In the event youu prefer something more dynamic, I would recommend creaating your own components seperately and adding them to the main file. Below is an example of how  to create your own component with EasyUI
 
 ```
-export type RectWithContent = {
+type Props = {
     rect: Rectangle;
-    element?: React.ReactNode;
-    style?: ViewStyle;
 };
 
-export type RectFactory = (parent: Rectangle) => RectWithContent[];
-```
+const DUIExample = (props: Props) => {
+    const sidebar = Rectangle.create({
+        rectSides: [[props.rect, "left"]],
+        growDirection: "right",
+        growSize: 150,
+    }, "sidebar-box");
 
-This function receives the parent Rectangle and returns a list of RectWithContent objects—each describing a child’s geometry, style, and optional React element.
-This allows layouts to be programmatically generated based on the parent’s dimensions or position, enabling flexible and reusable UI structures.
+    const contentArea = Rectangle.create({
+        rectCorners: [[sidebar, "top-right"], [props.rect, "bottom-right"]],
+    }, "content-area-box");
 
-Note: You  need to place the RelativeBox inside another RelativeBox or an AbsoluteBox for it to have any affect.
+    const bottomArea = Rectangle.create({
+        rectCorners: [[sidebar, "bottom-right"], [props.rect, "bottom-right"]],
+        growDirection: "top",
+        growSize: 300,
+    }, "bottom-area-box");
 
-```
-const flagFactory: RectFactory = (selfRect) => {
-    const tl = Rectangle.create({
-        size: { width: 20, height: 20 },
-        refCorner: 'top-left',
-        rectCorners: [[selfRect, "top-left"]],
-    }, "flag1-tl");
+    return (
+        <CUIAbsoluteBox rect={props.rect}>
+            <CUIAbsoluteBox rect={sidebar} style={{ backgroundColor: 'lightgray' }} />
 
-    const br = Rectangle.create({
-        size: { width: 20, height: 20 },
-        refCorner: 'bottom-right',
-        rectCorners: [[selfRect, "bottom-right"]],
-    }, "flag1-br");
-
-    const center = Rectangle.create({
-        rectCorners: [[tl, "bottom-right"], [br, "top-left"]],
-    }, "flag1-center");
-
-    return [{ rect: tl, style: { backgroundColor: 'lightblue' } }, { rect: br, style: { backgroundColor: 'lightcoral' } }, { rect: center, style: { backgroundColor: 'lightgreen' } }];
+            <CUIAbsoluteBox rect={contentArea} padding={20}>
+                <CUITextField type="email" placeholder="Enter your email" value={email} onChangeText={setEmail} />
+                <CUITextField type="password" placeholder="Enter your password" value={password} onChangeText={setPassword} />
+                <CUIButton text="Submit" onPress={() => { console.log("Button Pressed") }} />
+            </CUIAbsoluteBox>
+        </CUIAbsoluteBox>
+    )
 }
-
-<CUIAbsoluteBox rect={root}>
-    <CUIRelativeBox factory={flagFactory} />
-</CUIAbsoluteBox>
 ```
+
+In the above example I am passing in a Rectangle as a prop, but you can use a fixed rectaangle if that is better.
 
 ## RefRegistry
 
-RefRegistry is a data structure that keeps track of all the `Rect` created and their associated box components
+RefRegistry is a data structure that keeps track of all the `Rect` created and their associated box components, while also serving as a signal bus for all the other components. The RefRegistry is automatically updated whenever a rectangle is created, creating a tree representing the relations off all CUI-Components. You can see the tree generated in console using `console.log(RefRegistry.treeStringAll())`. Below is an example of a tree generated.
+
+```
+root (id: 0) (Referenced)
+├── tl-box (id: 0) (No Reference)
+│   └── header-box (id: 0) (Referenced)
+│       ├── tl-header-box (id: 0) (Referenced)
+│       └── body-box (id: 0) (Referenced)
+│           ├── sidebar-box (id: 0) (Referenced)
+│           │   ├── content-area-box (id: 0) (Referenced)
+│           │   └── bottom-area-box (id: 0) (Referenced)
+│           ├── content-area-box (id: 0) (Referenced)
+│           └── bottom-area-box (id: 0) (Referenced)
+├── tr-box (id: 0) (No Reference)
+│   └── header-box (id: 0) (Referenced)
+│       ├── tl-header-box (id: 0) (Referenced)
+│       └── body-box (id: 0) (Referenced)
+│           ├── sidebar-box (id: 0) (Referenced)
+│           │   ├── content-area-box (id: 0) (Referenced)
+│           │   └── bottom-area-box (id: 0) (Referenced)
+│           ├── content-area-box (id: 0) (Referenced)
+│           └── bottom-area-box (id: 0) (Referenced)
+├── br-box (id: 0) (No Reference)
+└── bl-box (id: 0) (No Reference)
+    └── body-box (id: 0) (Referenced)
+        ├── sidebar-box (id: 0) (Referenced)
+        │   ├── content-area-box (id: 0) (Referenced)
+        │   └── bottom-area-box (id: 0) (Referenced)
+        ├── content-area-box (id: 0) (Referenced)
+        └── bottom-area-box (id: 0) (Referenced)
+```
+
+Note: You may notice that some components appear more than once, this is because they rely on more than 1 parent and as such appear multiple times.
+Note2: "Reference" refers to if there is a component attached to the Rectangle. In this case, tl-box and friends are margin boxes and are not attached to a CUI-Component. If you want to create a new component that uses a Rectangle but not a CUI-Component for whatever reason, you can use the following command to change the referenced component or create a new reference.
+
+```
+const internalRef = useRef<any>(null);
+
+useEffect(() => {
+    RefRegistry.updateReference(props.rect.className, props.rect.id, internalRef.current);
+
+    return () => {
+        RefRegistry.removeReference(props.rect.className, props.rect.id);
+    }
+}, [props.rect]);
+```
+
+Of course, there is more to RefRegistry than just a fancy debug tools, you can use create signals and send them from one component to another easily. To do so, create them like so
+
+```
+const internalRef = useRef<any>(null);
+
+useImperativeHandle(internalRef, () => ({
+    receiveSignal(signal: SignalObject) {
+        switch (signal.key) {
+            case 'signal1':
+                doSomething(signal.value);
+                //Do something
+                break;
+            default:
+                break;
+            }
+        }
+    }));
+
+useEffect(() => {
+    RefRegistry.updateReference(props.rect.className, props.rect.id, internalRef.current);
+
+    return () => {
+        RefRegistry.removeReference(props.rect.className, props.rect.id);
+    }
+}, [props.rect]);
+```
+
+You can then send signals using `sendSignalTo(signal: SignalObject, className: string, id?: number)` or `sendSignalToAll(signal: SignalObject) ` command to communicate to another CUI-Component easily where `SignalObject = { key: string; value?: any; }`.
