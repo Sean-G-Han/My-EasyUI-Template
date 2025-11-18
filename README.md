@@ -8,7 +8,6 @@ A lightweight **React Native UI template** for building layouts using **constrai
 - [Usage](#Usage)
     - [Rect System](#Rect)
     - [CUIAbsoluteBox](#CUIAbsoluteBox)
-    - [CUIRelativeBox](#CUIRelativeBox)
     - [RefRegistry](#RefRegistry)
     - [Signals](#Signals)
 
