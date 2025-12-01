@@ -23,7 +23,7 @@ A lightweight **React Native UI template** for building layouts using **constrai
 If you want to use only the library (without the full project), you can add the `library-only` branch as a submodule in your own project:
 
 ```bash
-git submodule add -b library-only https://github.com/Sean-G-Han/project-a.git path/to/library
+git submodule add -b library-only https://github.com/Sean-G-Han/My-EasyUI-Template.git path/to/library
 git submodule update --init --recursive
 ```
 
