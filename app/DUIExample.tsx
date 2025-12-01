@@ -58,7 +58,7 @@ const DUIExample = (props: Props) => {
     const bottomArea = Rectangle.create({
         rectCorners: [[sidebar, "bottom-right"], [props.rect, "bottom-right"]],
         growDirection: "top",
-        growSize: 300,
+        growSize: 100,
     }, "bottom-area-box");
 
     return (
