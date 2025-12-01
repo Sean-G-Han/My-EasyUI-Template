@@ -42,7 +42,7 @@ const CUIAbsoluteBox = ({ children, rect, padding, style }: Props) => {
     const parent = React.useContext(RectContext);
     let translateStyle = {};
     let sizeStyle = {};
-    if ( mainXYWH.x !== 0 && mainXYWH.y !== 0) {
+    if ( mainXYWH.x !== 0 || mainXYWH.y !== 0) {
         let left = mainXYWH.x - parent.x;
         let top = mainXYWH.y - parent.y;
         translateStyle = {
@@ -59,7 +59,7 @@ const CUIAbsoluteBox = ({ children, rect, padding, style }: Props) => {
         };
     }
     const mainStyle = {
-        position: mainXYWH.x && mainXYWH.y ? 'absolute' as const : undefined,
+        position: mainXYWH.x || mainXYWH.y ? 'absolute' as const : undefined,
         padding: padding || 0,
         gap: padding || 0,
         borderWidth: isHighlighted ? 2 : 0,
